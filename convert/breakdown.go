@@ -11,7 +11,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-const SubjectAndNotExemptCode = "S1"
+const subjectAndNotExemptCode = "S1"
 
 // TipoDesglose contains info about the taxes breakdown of
 // an invoice
@@ -141,7 +141,7 @@ func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
 			})
 		default:
 			if code.IsEmpty() {
-				code = cbc.Code(SubjectAndNotExemptCode)
+				code = cbc.Code(subjectAndNotExemptCode)
 			}
 			dne := df.Sujeta.NoExenta.appendDetalle(&DetalleNoExenta{
 				TipoNoExenta: code.String(),
