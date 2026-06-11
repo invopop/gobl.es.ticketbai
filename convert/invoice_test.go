@@ -199,15 +199,21 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "51", claves.IDClave[0].ClaveRegimenIvaOpTrascendencia)
 	})
 
-	t.Run("should add simplified tax regime (52) when invoice carries simplified-scheme tag",
+	t.Run("should add simplified tax regime (52) when combo carries es-tbai-regime=52",
 		func(t *testing.T) {
+			// The simplified-scheme tag no longer derives regime 52 on its own
+			// (v0.500 addon); it must be provided explicitly per combo.
 			goblInvoice := test.LoadInvoice("sample-invoice.json")
 			goblInvoice.Lines = []*bill.Line{{
 				Index:    1,
 				Quantity: num.MakeAmount(100, 0),
 				Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 				Taxes: tax.Set{
-					&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"},
+					&tax.Combo{
+						Category: tax.CategoryVAT,
+						Rate:     "standard",
+						Ext:      tax.ExtensionsOf(cbc.CodeMap{tbai.ExtKeyRegime: "52"}),
+					},
 				},
 			}}
 			goblInvoice.SetTags(es.TagSimplifiedScheme)

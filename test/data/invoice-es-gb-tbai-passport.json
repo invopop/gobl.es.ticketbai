@@ -4,7 +4,7 @@
 		"uuid": "019e3fdd-8a5f-7213-9f3b-84844f692fc5",
 		"dig": {
 			"alg": "sha256",
-			"val": "5d174c61eb56151c417444423806d0c4d703c486157e37766c1d5333dbc964f5"
+			"val": "ed5f727d039c340716c2d893a99461caeadc254f9e5696f211a24776d8fb3361"
 		}
 	},
 	"doc": {
@@ -12,9 +12,6 @@
 		"$regime": "ES",
 		"$addons": [
 			"es-tbai-v1"
-		],
-		"$tags": [
-			"customer-rates"
 		],
 		"uuid": "019e3fdd-8a5f-7213-9f3b-8485cf692b71",
 		"type": "standard",
@@ -75,9 +72,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"country": "GB",
 						"key": "standard",
 						"rate": "general",
-						"percent": "21.0%",
+						"percent": "20.0%",
 						"ext": {
 							"es-tbai-exemption": "RL",
 							"es-tbai-product": "services",
@@ -97,6 +95,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"country": "GB",
 								"key": "standard",
 								"ext": {
 									"es-tbai-exemption": "RL",
@@ -104,18 +103,18 @@
 									"es-tbai-regime": "01"
 								},
 								"base": "150.00",
-								"percent": "21.0%",
-								"amount": "31.50"
+								"percent": "20.0%",
+								"amount": "30.00"
 							}
 						],
-						"amount": "31.50"
+						"amount": "30.00"
 					}
 				],
-				"sum": "31.50"
+				"sum": "30.00"
 			},
-			"tax": "31.50",
-			"total_with_tax": "181.50",
-			"payable": "181.50"
+			"tax": "30.00",
+			"total_with_tax": "180.00",
+			"payable": "180.00"
 		},
 		"notes": [
 			{

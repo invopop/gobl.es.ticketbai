@@ -11,6 +11,8 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
+const SubjectAndNotExemptCode = "S1"
+
 // TipoDesglose contains info about the taxes breakdown of
 // an invoice
 type TipoDesglose struct {
@@ -138,8 +140,8 @@ func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
 				BaseImponible: rate.Base.Rescale(2).String(),
 			})
 		default:
-			if code.String() == "" {
-				code = cbc.Code("S1")
+			if code.IsEmpty() {
+				code = cbc.Code(SubjectAndNotExemptCode)
 			}
 			dne := df.Sujeta.NoExenta.appendDetalle(&DetalleNoExenta{
 				TipoNoExenta: code.String(),
@@ -154,7 +156,7 @@ func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
 
 func splitByTBAIProduct(rates []*tax.RateTotal) (goods, services []*tax.RateTotal) {
 	for _, rate := range rates {
-		if rate.Ext.Get(tbai.ExtKeyProduct) == "goods" {
+		if rate.Ext.Get(tbai.ExtKeyProduct) == tbai.ExtValueProductGoods {
 			goods = append(goods, rate)
 		} else {
 			services = append(services, rate)
@@ -228,7 +230,7 @@ func newDetalleIVA(rate *tax.RateTotal) *DetalleIVA {
 		diva.CuotaRecargoEquivalencia = rate.Surcharge.Amount.Rescale(2).String()
 	}
 
-	if rate.Ext.Get(tbai.ExtKeyRegime) == "52" || rate.Ext.Get(tbai.ExtKeyProduct) == "resale" {
+	if rate.Ext.Get(tbai.ExtKeyRegime) == "52" || rate.Ext.Get(tbai.ExtKeyProduct) == tbai.ExtValueProductResale {
 		diva.OperacionEnRecargoDeEquivalenciaORegimenSimplificado = "S"
 	}
 

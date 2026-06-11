@@ -4,7 +4,7 @@
 		"uuid": "0192d3c7-2dc5-74cf-b263-5892feb44432",
 		"dig": {
 			"alg": "sha256",
-			"val": "8b599aa7496180e8f60df6a13671b2a1b7b55f47307103c975b377961c20488f"
+			"val": "fa9fc9f3c6819b00c2f9cfdc88ab0a5efdd999ccce51178252cb9d8c617cefbf"
 		}
 	},
 	"doc": {
@@ -24,7 +24,8 @@
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"es-tbai-region": "BI"
+				"es-tbai-region": "BI",
+				"es-tbai-simplified": "S"
 			}
 		},
 		"supplier": {
