@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-aaaa-7000-bbbb-000000000140",
 		"dig": {
 			"alg": "sha256",
-			"val": "d735a154cef9bc224665d9773a41efd327a0a5abe0637fccb5d742b97f7c2668"
+			"val": "fb5b0643e9315f79da693d9fccb66a0576689066ae6c4452614e12027db44e6c"
 		}
 	},
 	"doc": {
@@ -77,10 +77,7 @@
 				"quantity": "8",
 				"item": {
 					"name": "Consulting services",
-					"price": "75.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "75.00"
 				},
 				"sum": "600.00",
 				"taxes": [
@@ -90,7 +87,8 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -108,7 +106,8 @@
 							{
 								"key": "standard",
 								"ext": {
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "600.00",
 								"percent": "21.0%",

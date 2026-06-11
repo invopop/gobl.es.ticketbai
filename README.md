@@ -224,6 +224,10 @@ The following extension can be applied to each line tax:
 
 _(\*) As noted elsewhere, `RL` will be set automatically set in invoices using the `customer-rates` tax tag. It can also be set explicitly using the `es-tbai-exemption` extension in invoices not using that tag._
 
+- `es-tbai-regime` - sets the `ClaveRegimenIvaOpTrascendencia` field per VAT/IGIC tax combo. Codes follow the TicketBAI XSD list (`01`–`17`, `51`–`53`). If not provided, GOBL fills it in during normalization from per-combo signals — `tax.KeyExport` → `02`, equivalence-surcharge rate → `51`, the invoice-level `simplified-scheme` tag → `52`, otherwise `01`. Set it explicitly when none of those defaults applies (e.g. travel agencies → `05`, cash accounting → `07`, OSS/IOSS → `17`); explicit values are always preserved.
+
+- `es-tbai-identity-type` - sets the `IDType` value under `IDOtro` for the customer's identity (L7 list, codes `02`–`06`). Normalization maps `org.IdentityKeyPassport` → `03`, `IdentityKeyForeign` → `04`, `IdentityKeyResident` → `05`, `IdentityKeyOther` → `06`. Set it explicitly on an identity with no key (or to override). Spanish NIFs use the `NIF` field directly, and EU/non-EU tax IDs map to `IDOtro/IDType` `02`/`04` automatically.
+
 ### Use-Cases
 
 Under what situations should the TicketBAI system be expected to function:

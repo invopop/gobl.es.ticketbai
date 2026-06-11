@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-5087-708c-9b31-e8f653ef0c52",
 		"dig": {
 			"alg": "sha256",
-			"val": "141d6328e1eae3dd5db177a2875d3e09314917f54bc03b23743bd6b45173a270"
+			"val": "66709a34b983c1cbfb38687e63a12ccb26fd1fdae72cf56a21b79bcda2a01418"
 		}
 	},
 	"doc": {
@@ -81,7 +81,8 @@
 						"key": "exempt",
 						"ext": {
 							"es-tbai-exemption": "E1",
-							"es-tbai-product": "goods"
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -102,7 +103,8 @@
 						"key": "export",
 						"ext": {
 							"es-tbai-exemption": "E2",
-							"es-tbai-product": "goods"
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "02"
 						}
 					}
 				],
@@ -124,7 +126,8 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					},
 					{
@@ -148,7 +151,8 @@
 								"key": "exempt",
 								"ext": {
 									"es-tbai-exemption": "E1",
-									"es-tbai-product": "goods"
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "01"
 								},
 								"base": "600.00",
 								"amount": "0.00"
@@ -157,7 +161,8 @@
 								"key": "export",
 								"ext": {
 									"es-tbai-exemption": "E2",
-									"es-tbai-product": "goods"
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "02"
 								},
 								"base": "100.00",
 								"amount": "0.00"
@@ -165,7 +170,8 @@
 							{
 								"key": "standard",
 								"ext": {
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "300.00",
 								"percent": "21.0%",

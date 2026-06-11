@@ -4,5 +4,5 @@
 	     ticketBaiV1-2.xsd's HTTP import is recognised as already
 	     satisfied. Lets the schema compile without network access. -->
 	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="./xmldsig-core-schema.xsd" />
-	<xs:import namespace="urn:ticketbai:emision" schemaLocation="./ticketBaiV1-2.xsd" />
+	<xs:import namespace="urn:ticketbai:emision" schemaLocation="./ticketbaiv1-2-2.xsd" />
 </xs:schema>

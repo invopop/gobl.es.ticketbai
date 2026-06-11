@@ -5,7 +5,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -69,9 +68,9 @@ type IDFacturaRectificadaSustituida struct {
 }
 
 func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
-	simplifiedInvoice := "N"
-	if inv.HasTags(tax.TagSimplified) {
-		simplifiedInvoice = "S"
+	simplifiedInvoice := tbai.ExtValueSimplifiedNo.String()
+	if isSimplified(inv) {
+		simplifiedInvoice = tbai.ExtValueSimplifiedYes.String()
 	}
 
 	return &CabeceraFactura{
@@ -81,6 +80,12 @@ func newCabeceraFactura(inv *bill.Invoice) *CabeceraFactura {
 		FacturaRectificativa:            newFacturaRectificativa(inv),
 		FacturasRectificadasSustituidas: newFacturasRectificadasSustituidas(inv),
 	}
+}
+
+// isSimplified reports whether the invoice carries the es-tbai-simplified=S
+// extension that the addon's normalizer sets from the GOBL simplified tag.
+func isSimplified(inv *bill.Invoice) bool {
+	return inv.Tax != nil && inv.Tax.Ext.Get(tbai.ExtKeySimplified) == tbai.ExtValueSimplifiedYes
 }
 
 func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
@@ -146,34 +151,32 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 	return totalRetention.String()
 }
 
+// newClaves returns the distinct ClaveRegimen codes from each VAT rate's
+// es-tbai-regime extension.
 func newClaves(inv *bill.Invoice) []IDClave {
 	claves := []IDClave{}
 
-	if inv.Customer != nil && partyCountry(inv.Customer) != "ES" {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "02",
-		})
+	if inv.Totals != nil && inv.Totals.Taxes != nil {
+		if cat := inv.Totals.Taxes.Category(tax.CategoryVAT); cat != nil {
+			for _, rate := range cat.Rates {
+				code := rate.Ext.Get(tbai.ExtKeyRegime).String()
+				if code == "" || hasClave(claves, code) {
+					continue
+				}
+				claves = append(claves, IDClave{ClaveRegimenIvaOpTrascendencia: code})
+			}
+		}
 	}
-
-	if hasSurchargedLines(inv) {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "51",
-		})
-	}
-
-	if underSimplifiedRegime(inv) {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "52",
-		})
-	}
-
-	if len(claves) == 0 {
-		claves = append(claves, IDClave{
-			ClaveRegimenIvaOpTrascendencia: "01",
-		})
-	}
-
 	return claves
+}
+
+func hasClave(claves []IDClave, code string) bool {
+	for _, c := range claves {
+		if c.ClaveRegimenIvaOpTrascendencia == code {
+			return true
+		}
+	}
+	return false
 }
 
 func newFacturaRectificativa(inv *bill.Invoice) *FacturaRectificativa {
@@ -205,26 +208,4 @@ func newFacturasRectificadasSustituidas(inv *bill.Invoice) *FacturasRectificadas
 			},
 		},
 	}
-}
-
-func hasSurchargedLines(inv *bill.Invoice) bool {
-	if inv.Totals == nil || inv.Totals.Taxes == nil {
-		return false
-	}
-	vat := inv.Totals.Taxes.Category(tax.CategoryVAT)
-	if vat == nil {
-		return false
-	}
-
-	for _, rate := range vat.Rates {
-		if rate.Ext.Get(tbai.ExtKeyProduct) == "resale" {
-			return true
-		}
-	}
-
-	return false
-}
-
-func underSimplifiedRegime(inv *bill.Invoice) bool {
-	return inv.HasTags(es.TagSimplifiedScheme)
 }

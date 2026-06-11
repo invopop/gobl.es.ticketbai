@@ -4,7 +4,7 @@
 		"uuid": "0192fbd4-a54b-7d7a-be6e-258ea15f17a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "44ba3b1e2e99f3b4d55310577036eba8d0a4c363f0447fe1faff0794c6bba38c"
+			"val": "df3aacc3d820d331450b4ff01c198007c41cccae9998a9450cea93df45bcdceb"
 		}
 	},
 	"doc": {
@@ -74,10 +74,7 @@
 				"quantity": "10",
 				"item": {
 					"name": "Item being purchased",
-					"price": "100.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "100.00"
 				},
 				"sum": "1000.00",
 				"discounts": [
@@ -94,7 +91,8 @@
 						"percent": "21.0%",
 						"surcharge": "5.2%",
 						"ext": {
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "51"
 						}
 					},
 					{
@@ -117,7 +115,8 @@
 							{
 								"key": "standard",
 								"ext": {
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "51"
 								},
 								"base": "900.00",
 								"percent": "21.0%",

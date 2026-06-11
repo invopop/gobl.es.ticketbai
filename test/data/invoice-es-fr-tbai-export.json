@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192237d-49c2-79a7-8249-4280119d8adf",
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fdf940a5859",
 		"dig": {
 			"alg": "sha256",
-			"val": "fba8e96bb4b8f0cb88cc2c3d5eee737816bdde9afeeb2e96218c4a141624b78a"
+			"val": "6154e4b98480f9019e08e80b63fc51d19395503655e590953467bbe99c1560a4"
 		}
 	},
 	"doc": {
@@ -13,11 +13,11 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "3b445a46-a0ac-11ee-a4ee-e6a7901137ee",
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fe030e9a927",
 		"type": "standard",
-		"series": "RC",
-		"code": "0001",
-		"issue_date": "2022-02-01",
+		"series": "EXPORT",
+		"code": "0010",
+		"issue_date": "2024-03-12",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
@@ -47,55 +47,52 @@
 			]
 		},
 		"customer": {
-			"name": "Sample Customer",
+			"name": "Client Atelier SAS",
 			"tax_id": {
-				"country": "ES",
-				"code": "54387763P"
+				"country": "FR",
+				"code": "39356000000"
 			}
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "20",
+				"quantity": "5",
 				"item": {
-					"name": "Construction services subject to reverse charge",
-					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"key": "goods",
+					"name": "Crafted leather goods",
+					"price": "120.00"
 				},
-				"sum": "1800.00",
+				"sum": "600.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "reverse-charge",
+						"key": "export",
 						"ext": {
-							"es-tbai-exemption": "S2",
-							"es-tbai-product": "services",
-							"es-tbai-regime": "01"
+							"es-tbai-exemption": "E2",
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "02"
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "600.00"
 			}
 		],
 		"totals": {
-			"sum": "1800.00",
-			"total": "1800.00",
+			"sum": "600.00",
+			"total": "600.00",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "reverse-charge",
+								"key": "export",
 								"ext": {
-									"es-tbai-exemption": "S2",
-									"es-tbai-product": "services",
-									"es-tbai-regime": "01"
+									"es-tbai-exemption": "E2",
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "02"
 								},
-								"base": "1800.00",
+								"base": "600.00",
 								"amount": "0.00"
 							}
 						],
@@ -105,13 +102,13 @@
 				"sum": "0.00"
 			},
 			"tax": "0.00",
-			"total_with_tax": "1800.00",
-			"payable": "1800.00"
+			"total_with_tax": "600.00",
+			"payable": "600.00"
 		},
 		"notes": [
 			{
 				"key": "general",
-				"text": "Reverse-charge construction services (Art. 84.1.2.f LIVA)."
+				"text": "Goods exported to France."
 			}
 		]
 	}

@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192237d-49c2-79a7-8249-4280119d8adf",
+		"uuid": "01963e5f-7000-7000-bbbb-000000000006",
 		"dig": {
 			"alg": "sha256",
-			"val": "fba8e96bb4b8f0cb88cc2c3d5eee737816bdde9afeeb2e96218c4a141624b78a"
+			"val": "e3aef09262333c11e95a66be417afd28a35700b88f26519c795104d86019d330"
 		}
 	},
 	"doc": {
@@ -13,11 +13,11 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "3b445a46-a0ac-11ee-a4ee-e6a7901137ee",
+		"uuid": "01963e5f-7000-7000-cccc-000000000006",
 		"type": "standard",
-		"series": "RC",
-		"code": "0001",
-		"issue_date": "2022-02-01",
+		"series": "EXPORT-X",
+		"code": "0006",
+		"issue_date": "2026-05-14",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
@@ -47,55 +47,57 @@
 			]
 		},
 		"customer": {
-			"name": "Sample Customer",
-			"tax_id": {
-				"country": "ES",
-				"code": "54387763P"
-			}
+			"name": "Sample Swiss Customer",
+			"identities": [
+				{
+					"country": "CH",
+					"code": "CH-OTHER-9001",
+					"ext": {
+						"es-tbai-identity-type": "06"
+					}
+				}
+			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "20",
+				"quantity": "1",
 				"item": {
-					"name": "Construction services subject to reverse charge",
-					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"name": "Consulting hour",
+					"price": "100.00",
+					"unit": "h"
 				},
-				"sum": "1800.00",
+				"sum": "100.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "reverse-charge",
+						"key": "outside-scope",
 						"ext": {
-							"es-tbai-exemption": "S2",
+							"es-tbai-exemption": "RL",
 							"es-tbai-product": "services",
 							"es-tbai-regime": "01"
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "100.00"
 			}
 		],
 		"totals": {
-			"sum": "1800.00",
-			"total": "1800.00",
+			"sum": "100.00",
+			"total": "100.00",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "reverse-charge",
+								"key": "outside-scope",
 								"ext": {
-									"es-tbai-exemption": "S2",
+									"es-tbai-exemption": "RL",
 									"es-tbai-product": "services",
 									"es-tbai-regime": "01"
 								},
-								"base": "1800.00",
+								"base": "100.00",
 								"amount": "0.00"
 							}
 						],
@@ -105,13 +107,13 @@
 				"sum": "0.00"
 			},
 			"tax": "0.00",
-			"total_with_tax": "1800.00",
-			"payable": "1800.00"
+			"total_with_tax": "100.00",
+			"payable": "100.00"
 		},
 		"notes": [
 			{
 				"key": "general",
-				"text": "Reverse-charge construction services (Art. 84.1.2.f LIVA)."
+				"text": "Customer identified via explicit es-tbai-identity-type=06 (Other) on an unkeyed identity."
 			}
 		]
 	}

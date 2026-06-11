@@ -4,7 +4,7 @@
 		"uuid": "0192237d-498e-7273-bc95-6a1daf16cb37",
 		"dig": {
 			"alg": "sha256",
-			"val": "17ebc6a92e6765d5314388c36ce3c0fa863ba65f4d9af3ad58510e5ad4776223"
+			"val": "a7b415ac79e649ccc085accd6a4b08478e9b9d7b85708ad477956ef01613dd7e"
 		}
 	},
 	"doc": {
@@ -54,7 +54,10 @@
 			"identities": [
 				{
 					"key": "passport",
-					"code": "123456789"
+					"code": "123456789",
+					"ext": {
+						"es-tbai-identity-type": "03"
+					}
 				}
 			]
 		},
@@ -65,10 +68,7 @@
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"unit": "h"
 				},
 				"sum": "1800.00",
 				"discounts": [
@@ -84,7 +84,8 @@
 						"key": "outside-scope",
 						"ext": {
 							"es-tbai-exemption": "RL",
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -103,7 +104,8 @@
 								"key": "outside-scope",
 								"ext": {
 									"es-tbai-exemption": "RL",
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "1620.00",
 								"amount": "0.00"

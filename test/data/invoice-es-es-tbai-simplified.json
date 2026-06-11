@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192fd51-6cd8-73f2-a182-8c4d3901d125",
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fdd2927474b",
 		"dig": {
 			"alg": "sha256",
-			"val": "04d54c6d613fa315808fe936a60fb7c26915acff052930e3b5189812f4b1872d"
+			"val": "959a1a9196e206cc828e5f0d61d16fdcd4b50a6e4ec49194a06eee26688d771e"
 		}
 	},
 	"doc": {
@@ -13,16 +13,26 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "0192fd50-b568-7819-acf7-c2cfc5478b18",
+		"$tags": [
+			"simplified-scheme"
+		],
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fde291742db",
 		"type": "standard",
-		"series": "TEST",
-		"code": "004",
-		"issue_date": "2022-02-01",
+		"series": "SIMPL",
+		"code": "0042",
+		"issue_date": "2024-05-21",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"es-tbai-region": "VI"
-			}
+				"es-tbai-region": "SS"
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "simplified-scheme",
+					"text": "Factura expedida por contribuyente en régimen simplificado."
+				}
+			]
 		},
 		"supplier": {
 			"name": "ZIURTAPEN ZERBITZU ENPRESA-EMPRESA CERTIFICACION Y SERVICIOS IZENPE SA",
@@ -32,11 +42,11 @@
 			},
 			"addresses": [
 				{
-					"num": "18",
-					"street": "Calle Postas",
-					"locality": "Vitoria-Gasteiz",
-					"region": "Araba",
-					"code": "01001",
+					"num": "42",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
 					"country": "ES"
 				}
 			],
@@ -47,7 +57,7 @@
 			]
 		},
 		"customer": {
-			"name": "Sample Customer",
+			"name": "Cliente Particular",
 			"tax_id": {
 				"country": "ES",
 				"code": "54387763P"
@@ -55,35 +65,24 @@
 			"addresses": [
 				{
 					"num": "13",
-					"street": "Calle del Barro",
-					"locality": "Alcañiz",
-					"region": "Teruel",
-					"code": "44600",
+					"street": "Calle Mayor",
+					"locality": "Donostia",
+					"region": "Gipuzkoa",
+					"code": "20003",
 					"country": "ES"
-				}
-			],
-			"emails": [
-				{
-					"addr": "customer@example.com"
 				}
 			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "10",
+				"quantity": "1",
 				"item": {
 					"key": "services",
-					"name": "Item being purchased",
-					"price": "100.00"
+					"name": "Mechanic shop module",
+					"price": "300.00"
 				},
-				"sum": "1000.00",
-				"discounts": [
-					{
-						"percent": "10%",
-						"amount": "100.00"
-					}
-				],
+				"sum": "300.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -92,16 +91,16 @@
 						"percent": "21.0%",
 						"ext": {
 							"es-tbai-product": "services",
-							"es-tbai-regime": "01"
+							"es-tbai-regime": "52"
 						}
 					}
 				],
-				"total": "900.00"
+				"total": "300.00"
 			}
 		],
 		"totals": {
-			"sum": "900.00",
-			"total": "900.00",
+			"sum": "300.00",
+			"total": "300.00",
 			"taxes": {
 				"categories": [
 					{
@@ -111,26 +110,26 @@
 								"key": "standard",
 								"ext": {
 									"es-tbai-product": "services",
-									"es-tbai-regime": "01"
+									"es-tbai-regime": "52"
 								},
-								"base": "900.00",
+								"base": "300.00",
 								"percent": "21.0%",
-								"amount": "189.00"
+								"amount": "63.00"
 							}
 						],
-						"amount": "189.00"
+						"amount": "63.00"
 					}
 				],
-				"sum": "189.00"
+				"sum": "63.00"
 			},
-			"tax": "189.00",
-			"total_with_tax": "1089.00",
-			"payable": "1089.00"
+			"tax": "63.00",
+			"total_with_tax": "363.00",
+			"payable": "363.00"
 		},
 		"notes": [
 			{
 				"key": "general",
-				"text": "Some random description"
+				"text": "Operation under the simplified VAT regime (módulos)."
 			}
 		]
 	}

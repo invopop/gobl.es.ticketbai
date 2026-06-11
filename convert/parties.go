@@ -3,22 +3,10 @@ package convert
 import (
 	"strings"
 
-	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 )
-
-const (
-	idTypeCodeNIFVAT  = "02"
-	idTypeCodeForeign = "04"
-)
-
-var idTypeCodeMap = map[cbc.Key]string{
-	org.IdentityKeyPassport: "03",
-	org.IdentityKeyForeign:  "04",
-	org.IdentityKeyResident: "05",
-	org.IdentityKeyOther:    "06",
-}
 
 // Sujetos contains invoice parties info
 type Sujetos struct {
@@ -87,49 +75,44 @@ func newDestinatario(party *org.Party) *IDDestinatario {
 }
 
 func otherIdentity(party *org.Party) *IDOtro {
-	oid := new(IDOtro)
-	if party.TaxID != nil {
+	if party.TaxID != nil && party.TaxID.Code != "" {
+		country := party.TaxID.Country.String()
+		idType := taxIDType(party.TaxID.Country)
+		id := party.TaxID.Code.String()
+		if idType == tbai.ExtCodeIdentityTypeVAT.String() && !strings.HasPrefix(id, country) {
+			id = country + id
+		}
+		return &IDOtro{
+			CodigoPais: country,
+			IDType:     idType,
+			ID:         id,
+		}
+	}
+	id := org.IdentityForExtKey(party.Identities, tbai.ExtKeyIdentityType)
+	if id == nil || id.Code == "" {
+		return nil
+	}
+	oid := &IDOtro{
+		IDType: id.Ext.Get(tbai.ExtKeyIdentityType).String(),
+		ID:     id.Code.String(),
+	}
+	switch {
+	case id.Country != "":
+		oid.CodigoPais = id.Country.String()
+	case party.TaxID != nil:
 		oid.CodigoPais = party.TaxID.Country.String()
 	}
-
-	if party.TaxID != nil && party.TaxID.Code != "" {
-		oid.IDType = taxIDType(party.TaxID.Country)
-		id := party.TaxID.Code.String()
-		if oid.IDType == idTypeCodeNIFVAT {
-			country := party.TaxID.Country.String()
-			if !strings.HasPrefix(id, country) {
-				id = country + id
-			}
-		}
-		oid.ID = id
-		return oid
-	}
-
-	for _, id := range party.Identities {
-		if id == nil || id.Code == "" {
-			continue
-		}
-		it, ok := idTypeCodeMap[id.Key]
-		if !ok {
-			continue
-		}
-
-		oid.IDType = it
-		oid.ID = id.Code.String()
-		if id.Country != "" {
-			oid.CodigoPais = id.Country.String()
-		}
-		return oid
-	}
-
-	return nil
+	return oid
 }
 
+// taxIDType maps a non-Spanish customer tax ID to its TicketBAI IDType:
+// EU members → NIF-VAT (02), others → foreign document (04). The gateway
+// rejects non-EU tax IDs sent as 02 with B4_2000013.
 func taxIDType(country l10n.TaxCountryCode) string {
 	if l10n.Union(l10n.EU).HasMember(country.Code()) {
-		return idTypeCodeNIFVAT
+		return tbai.ExtCodeIdentityTypeVAT.String()
 	}
-	return idTypeCodeForeign
+	return tbai.ExtCodeIdentityTypeForeign.String()
 }
 
 func partyCountry(party *org.Party) l10n.TaxCountryCode {

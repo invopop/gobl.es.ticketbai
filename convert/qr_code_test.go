@@ -61,8 +61,8 @@ func TestQRCodes(t *testing.T) {
 		assert.Equal(t, true, strings.HasPrefix(codes.TBAICode, "TBAI-"))
 		assert.Contains(t, codes.TBAICode, "-S7836107H-")
 		assert.Contains(t, codes.TBAICode, "-020222-")
-		assert.Contains(t, codes.TBAICode, "-f5Rn+qgOvh9Kr-")
-		assert.Contains(t, codes.TBAICode, "-238")
+		assert.Contains(t, codes.TBAICode, "-JzKI54fHylY3s-")
+		assert.Contains(t, codes.TBAICode, "-153")
 	})
 
 	t.Run("should build QR code for an invoice", func(t *testing.T) {
@@ -76,7 +76,7 @@ func TestQRCodes(t *testing.T) {
 		assert.Contains(t, codes.QRCode, "&s=TEST")
 		assert.Contains(t, codes.QRCode, "&nf=001")
 		assert.Contains(t, codes.QRCode, "&i=1089.00")
-		assert.Contains(t, codes.QRCode, "&cr=174") // changes according to test data
+		assert.Contains(t, codes.QRCode, "&cr=010") // changes according to test data
 	})
 
 	t.Run("should build QR code for an invoice without series", func(t *testing.T) {
@@ -91,6 +91,6 @@ func TestQRCodes(t *testing.T) {
 		assert.NotContains(t, codes.QRCode, "&s=TEST")
 		assert.Contains(t, codes.QRCode, "&nf=001")
 		assert.Contains(t, codes.QRCode, "&i=1089.00")
-		assert.Contains(t, codes.QRCode, "&cr=133")
+		assert.Contains(t, codes.QRCode, "&cr=232")
 	})
 }

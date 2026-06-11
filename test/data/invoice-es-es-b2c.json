@@ -4,7 +4,7 @@
 		"uuid": "0192d3c7-2dc5-74cf-b263-5892feb44432",
 		"dig": {
 			"alg": "sha256",
-			"val": "b06f7d841e560bc318a02ac4604de7d5b31ce3743956e157f2b335e5437ec638"
+			"val": "fa9fc9f3c6819b00c2f9cfdc88ab0a5efdd999ccce51178252cb9d8c617cefbf"
 		}
 	},
 	"doc": {
@@ -24,7 +24,8 @@
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"es-tbai-region": "BI"
+				"es-tbai-region": "BI",
+				"es-tbai-simplified": "S"
 			}
 		},
 		"supplier": {
@@ -74,7 +75,8 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -96,7 +98,8 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
-							"es-tbai-product": "goods"
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -118,7 +121,8 @@
 						"rate": "reduced",
 						"percent": "10.0%",
 						"ext": {
-							"es-tbai-product": "goods"
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -136,7 +140,8 @@
 							{
 								"key": "standard",
 								"ext": {
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "1620.00",
 								"percent": "21.0%",
@@ -145,7 +150,8 @@
 							{
 								"key": "standard",
 								"ext": {
-									"es-tbai-product": "goods"
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "01"
 								},
 								"base": "90.00",
 								"percent": "21.0%",
@@ -154,7 +160,8 @@
 							{
 								"key": "standard",
 								"ext": {
-									"es-tbai-product": "goods"
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "01"
 								},
 								"base": "30.00",
 								"percent": "10.0%",

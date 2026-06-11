@@ -4,7 +4,7 @@
 		"uuid": "0192237d-4965-7c4b-914e-3a62f8e074e5",
 		"dig": {
 			"alg": "sha256",
-			"val": "79d6faaaccc909441e362aff275c8eb9d38e500e5b0d9acf24ed68a4f53b00a0"
+			"val": "cf4ad6b1affbbdb3f640f4d2962e2eca28a390f22a855546c966c6c358cf1485"
 		}
 	},
 	"doc": {
@@ -57,7 +57,10 @@
 			"identities": [
 				{
 					"key": "passport",
-					"code": "123456789"
+					"code": "123456789",
+					"ext": {
+						"es-tbai-identity-type": "03"
+					}
 				}
 			]
 		},
@@ -87,8 +90,9 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
-							"es-tbai-exemption": "RL",
-							"es-tbai-product": "services"
+							"es-tbai-exemption": "IE",
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -111,8 +115,9 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
-							"es-tbai-exemption": "RL",
-							"es-tbai-product": "goods"
+							"es-tbai-exemption": "IE",
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -135,8 +140,9 @@
 						"rate": "reduced",
 						"percent": "9.0%",
 						"ext": {
-							"es-tbai-exemption": "RL",
-							"es-tbai-product": "goods"
+							"es-tbai-exemption": "IE",
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -155,8 +161,9 @@
 								"country": "NL",
 								"key": "standard",
 								"ext": {
-									"es-tbai-exemption": "RL",
-									"es-tbai-product": "services"
+									"es-tbai-exemption": "IE",
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "1620.00",
 								"percent": "21.0%",
@@ -166,8 +173,9 @@
 								"country": "NL",
 								"key": "standard",
 								"ext": {
-									"es-tbai-exemption": "RL",
-									"es-tbai-product": "goods"
+									"es-tbai-exemption": "IE",
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "01"
 								},
 								"base": "90.00",
 								"percent": "21.0%",
@@ -177,8 +185,9 @@
 								"country": "NL",
 								"key": "standard",
 								"ext": {
-									"es-tbai-exemption": "RL",
-									"es-tbai-product": "goods"
+									"es-tbai-exemption": "IE",
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "01"
 								},
 								"base": "30.00",
 								"percent": "9.0%",

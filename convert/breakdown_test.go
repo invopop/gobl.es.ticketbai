@@ -79,9 +79,11 @@ func TestDesgloseConversion(t *testing.T) {
 			assert.Nil(t, details.Entrega)
 		})
 
-	t.Run("should divide details between services and goods", func(t *testing.T) {
+	t.Run("should divide not-subject details between services and goods", func(t *testing.T) {
+		// Not-subject lines are now expressed with the outside-scope key (the
+		// addon maps it to es-tbai-exemption=RL). The legacy customer-rates tag
+		// is no longer supported; the treatment is deduced from the combo.
 		goblInvoice := invoiceFromCountry("GB")
-		goblInvoice.SetTags(tax.TagCustomerRates)
 		goblInvoice.Lines = []*bill.Line{
 			{
 				Index:    1,
@@ -94,7 +96,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Taxes: tax.Set{
 					&tax.Combo{
 						Category: tax.CategoryVAT,
-						Rate:     "standard",
+						Key:      tax.KeyOutsideScope,
 					},
 				},
 			},
@@ -109,7 +111,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Taxes: tax.Set{
 					&tax.Combo{
 						Category: tax.CategoryVAT,
-						Rate:     "standard",
+						Key:      tax.KeyOutsideScope,
 					},
 				},
 			},
@@ -124,7 +126,7 @@ func TestDesgloseConversion(t *testing.T) {
 				Taxes: tax.Set{
 					&tax.Combo{
 						Category: tax.CategoryVAT,
-						Rate:     "reduced",
+						Key:      tax.KeyOutsideScope,
 					},
 				},
 			},
@@ -432,13 +434,19 @@ func TestDesgloseConversion(t *testing.T) {
 	})
 
 	t.Run("should mark lines if company works by modules (simplified regime)", func(t *testing.T) {
+		// As of the v0.500 addon the simplified-scheme tag alone no longer
+		// derives regime 52; it must be set explicitly via es-tbai-regime.
 		goblInvoice := invoiceFromCountry("ES")
 		goblInvoice.SetTags(es.TagSimplifiedScheme)
 		goblInvoice.Lines = []*bill.Line{{
 			Index:    1,
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
-			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
+			Taxes: tax.Set{&tax.Combo{
+				Category: tax.CategoryVAT,
+				Rate:     "standard",
+				Ext:      tax.ExtensionsOf(cbc.CodeMap{tbai.ExtKeyRegime: "52"}),
+			}},
 		}}
 		_ = goblInvoice.Calculate()
 
@@ -456,10 +464,7 @@ func TestDesgloseConversion(t *testing.T) {
 			Quantity: num.MakeAmount(100, 0),
 			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
 			Taxes: tax.Set{
-				&tax.Combo{
-					Category: tax.CategoryVAT,
-					Key:      tax.KeyReverseCharge,
-				},
+				&tax.Combo{Category: tax.CategoryVAT, Key: tax.KeyReverseCharge},
 			},
 		}}
 		_ = goblInvoice.Calculate()

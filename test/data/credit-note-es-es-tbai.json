@@ -4,7 +4,7 @@
 		"uuid": "0192237d-4943-72a7-b1d0-51dca3e8bc71",
 		"dig": {
 			"alg": "sha256",
-			"val": "1eb761ab794e83a8246c650759fbdecd8a17184a6035b3089cbf5999db897346"
+			"val": "831f0327f9c17c79e70beb6964321d7db6a2f490ee2735adf55ad7a1bd6bb584"
 		}
 	},
 	"doc": {
@@ -86,10 +86,7 @@
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"unit": "h"
 				},
 				"sum": "1800.00",
 				"discounts": [
@@ -106,7 +103,8 @@
 						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -117,10 +115,7 @@
 				"quantity": "1",
 				"item": {
 					"name": "Financial service",
-					"price": "10.00",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"price": "10.00"
 				},
 				"sum": "10.00",
 				"discounts": [
@@ -135,7 +130,8 @@
 						"key": "zero",
 						"percent": "0.0%",
 						"ext": {
-							"es-tbai-product": "services"
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
 						}
 					}
 				],
@@ -153,7 +149,8 @@
 							{
 								"key": "standard",
 								"ext": {
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "1620.00",
 								"percent": "21.0%",
@@ -162,7 +159,8 @@
 							{
 								"key": "zero",
 								"ext": {
-									"es-tbai-product": "services"
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
 								},
 								"base": "5.00",
 								"percent": "0.0%",

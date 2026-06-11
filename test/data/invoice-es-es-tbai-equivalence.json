@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0192237d-49c2-79a7-8249-4280119d8adf",
+		"uuid": "019e3fdd-8a5d-71b2-9997-552410880faf",
 		"dig": {
 			"alg": "sha256",
-			"val": "fba8e96bb4b8f0cb88cc2c3d5eee737816bdde9afeeb2e96218c4a141624b78a"
+			"val": "dcd1501f47be7f7dbd05e91c66a63c994a53786a87190942952ab19d53fd9f05"
 		}
 	},
 	"doc": {
@@ -13,11 +13,11 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "3b445a46-a0ac-11ee-a4ee-e6a7901137ee",
+		"uuid": "019e3fdd-8a5d-71b2-9997-55253d134f4b",
 		"type": "standard",
-		"series": "RC",
-		"code": "0001",
-		"issue_date": "2022-02-01",
+		"series": "EQS",
+		"code": "0007",
+		"issue_date": "2024-06-04",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
@@ -47,7 +47,7 @@
 			]
 		},
 		"customer": {
-			"name": "Sample Customer",
+			"name": "Comercio Minorista",
 			"tax_id": {
 				"country": "ES",
 				"code": "54387763P"
@@ -56,62 +56,66 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "20",
+				"quantity": "100",
 				"item": {
-					"name": "Construction services subject to reverse charge",
-					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"es-tbai-product": "services"
-					}
+					"key": "goods",
+					"name": "Wholesale mug pack",
+					"price": "5.00"
 				},
-				"sum": "1800.00",
+				"sum": "500.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "reverse-charge",
+						"key": "standard",
+						"rate": "general+eqs",
+						"percent": "21.0%",
+						"surcharge": "5.2%",
 						"ext": {
-							"es-tbai-exemption": "S2",
-							"es-tbai-product": "services",
-							"es-tbai-regime": "01"
+							"es-tbai-product": "goods",
+							"es-tbai-regime": "51"
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "500.00"
 			}
 		],
 		"totals": {
-			"sum": "1800.00",
-			"total": "1800.00",
+			"sum": "500.00",
+			"total": "500.00",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "reverse-charge",
+								"key": "standard",
 								"ext": {
-									"es-tbai-exemption": "S2",
-									"es-tbai-product": "services",
-									"es-tbai-regime": "01"
+									"es-tbai-product": "goods",
+									"es-tbai-regime": "51"
 								},
-								"base": "1800.00",
-								"amount": "0.00"
+								"base": "500.00",
+								"percent": "21.0%",
+								"surcharge": {
+									"percent": "5.2%",
+									"amount": "26.00"
+								},
+								"amount": "105.00"
 							}
 						],
-						"amount": "0.00"
+						"amount": "105.00",
+						"surcharge": "26.00"
 					}
 				],
-				"sum": "0.00"
+				"sum": "131.00"
 			},
-			"tax": "0.00",
-			"total_with_tax": "1800.00",
-			"payable": "1800.00"
+			"tax": "131.00",
+			"total_with_tax": "631.00",
+			"payable": "631.00"
 		},
 		"notes": [
 			{
 				"key": "general",
-				"text": "Reverse-charge construction services (Art. 84.1.2.f LIVA)."
+				"text": "Sale to retailer under the equivalence surcharge regime."
 			}
 		]
 	}
