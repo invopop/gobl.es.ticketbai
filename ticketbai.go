@@ -128,6 +128,10 @@ func New(software *Software, zone l10n.Code, opts ...Option) (*Client, error) {
 		opt(c)
 	}
 
+	if c.cert == nil {
+		return c, nil
+	}
+
 	if c.gw == nil {
 		var err error
 		c.gw, err = gateways.New(c.env, c.zone, c.cert)
