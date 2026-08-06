@@ -157,7 +157,10 @@ func (c *Client) Cancel(ctx context.Context, env *gobl.Envelope, d *convert.Anul
 	if !ok {
 		return ErrValidation.withMessage("only invoices are supported")
 	}
-	return c.gw.Cancel(ctx, inv, d)
+	if err := c.gw.Cancel(ctx, inv, d); err != nil {
+		return newErrorFrom(err)
+	}
+	return nil
 }
 
 // ParseDocument will parse the XML data into a TicketBAI document.

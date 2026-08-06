@@ -87,7 +87,7 @@ func (c *GipuzkoaConn) Cancel(ctx context.Context, _ *bill.Invoice, doc *convert
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return c.post(ctx, gipuzkoaCancelPath, payload)
+	return asCancelDuplicate(c.post(ctx, gipuzkoaCancelPath, payload))
 }
 
 func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) error {
