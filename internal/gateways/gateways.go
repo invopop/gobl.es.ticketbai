@@ -34,6 +34,26 @@ var (
 	ErrDuplicate  = newError("duplicate")
 )
 
+// Validation codes from the common TicketBAI specification, shared by the
+// Araba and Gipuzkoa gateways.
+const (
+	// codeAlreadyCancelled is returned when the invoice being cancelled has
+	// already been cancelled previously: "El fichero de alta ya ha sido
+	// anulado previamente".
+	codeAlreadyCancelled = "019"
+)
+
+// asCancelDuplicate converts the validation responses that imply the document
+// has already been cancelled into an ErrDuplicate, so that repeating a cancel
+// request can be handled as a no-op upstream.
+func asCancelDuplicate(err error) error {
+	var e *Error
+	if errors.As(err, &e) && e.Code() == codeAlreadyCancelled {
+		return ErrDuplicate.withCode(e.Code()).withMessage(e.Message())
+	}
+	return err
+}
+
 // Error allows for structured responses from the gateway to be able to
 // response codes and messages.
 type Error struct {
