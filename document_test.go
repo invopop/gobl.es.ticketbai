@@ -29,6 +29,27 @@ func TestConvertRemovesIncludedTaxes(t *testing.T) {
 		assert.Equal(t, "16.20", doc.Factura.DatosFactura.ImporteTotalFactura)
 	})
 
+	t.Run("is a no-op when the taxes were already removed upstream", func(t *testing.T) {
+		// The silo can strip included taxes as it serves an entry, depending on
+		// how the app action is configured. Conversion has to land in the same
+		// place whether or not it did.
+		raw := test.LoadEnvelope("invoice-es-es-tbai-prices-included.json")
+		rawDoc, err := tbai.Convert(raw)
+		require.NoError(t, err)
+
+		pre := test.LoadEnvelope("invoice-es-es-tbai-prices-included.json")
+		inv, ok := pre.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.NoError(t, inv.RemoveIncludedTaxes())
+		require.NoError(t, pre.Insert(inv))
+
+		preDoc, err := tbai.Convert(pre)
+		require.NoError(t, err)
+
+		assert.Equal(t, rawDoc.Factura.DatosFactura, preDoc.Factura.DatosFactura)
+		assert.Equal(t, rawDoc.Factura.TipoDesglose, preDoc.Factura.TipoDesglose)
+	})
+
 	t.Run("leaves the caller's envelope untouched", func(t *testing.T) {
 		// The envelope is signed by the time it reaches us and its digest
 		// covers the document, so removing the included taxes must happen on a
