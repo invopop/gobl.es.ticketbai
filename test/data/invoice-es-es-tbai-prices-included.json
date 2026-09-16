@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "01a0aa64-95e5-7649-86c0-52b65f70069c",
+		"uuid": "01a0aa6b-a8e5-7642-9fec-f7f3bb23f894",
 		"dig": {
 			"alg": "sha256",
-			"val": "6302dc92c632df7300de5a78a62fa0ddf3a78fca7b14271dff1db512ce3b5462"
+			"val": "957b6e24b7963d4233a70c2851354738b1b76a6d6c9456bc1352ed273e181f57"
 		}
 	},
 	"doc": {
@@ -23,6 +23,7 @@
 		"issue_date": "2024-05-21",
 		"currency": "EUR",
 		"tax": {
+			"prices_include": "VAT",
 			"ext": {
 				"es-tbai-region": "SS",
 				"es-tbai-simplified": "S"
@@ -56,12 +57,12 @@
 				"quantity": "1",
 				"item": {
 					"name": "Room",
-					"price": "12.39669",
+					"price": "15.000",
 					"ext": {
 						"es-tbai-product": "goods"
 					}
 				},
-				"sum": "12.39669",
+				"sum": "15.000",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -74,19 +75,19 @@
 						}
 					}
 				],
-				"total": "12.39669"
+				"total": "15.000"
 			},
 			{
 				"i": 2,
 				"quantity": "1",
 				"item": {
 					"name": "Fees",
-					"price": "0.99174",
+					"price": "1.200",
 					"ext": {
 						"es-tbai-product": "services"
 					}
 				},
-				"sum": "0.99174",
+				"sum": "1.200",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -99,11 +100,12 @@
 						}
 					}
 				],
-				"total": "0.99174"
+				"total": "1.200"
 			}
 		],
 		"totals": {
-			"sum": "13.39",
+			"sum": "16.20",
+			"tax_included": "2.81",
 			"total": "13.39",
 			"taxes": {
 				"categories": [

@@ -8,6 +8,14 @@ import (
 
 var regime = tax.RegimeDefFor("ES")
 
+const (
+	// currencyDecimals is the number of decimals expected of a currency amount,
+	// and the most an `ImporteSgn12.2Type` field accepts.
+	currencyDecimals uint32 = 2
+	// maxAmountDecimals is the most an `ImporteSgn12.8Type` field accepts.
+	maxAmountDecimals uint32 = 8
+)
+
 // DetallesFactura contains a list of detail lines info
 type DetallesFactura struct {
 	IDDetalleFactura []IDDetalleFactura
@@ -28,12 +36,13 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 		if line.Item.Price == nil {
 			continue
 		}
+		unit, discount := newImporteUnitarioDescuento(line)
 		lines = append(lines, IDDetalleFactura{
 			DescripcionDetalle: line.Item.Name,
 			Cantidad:           line.Quantity.String(),
-			ImporteUnitario:    newImporteUnitario(line),
-			Descuento:          calculateDiscounts(line).String(),
-			ImporteTotal:       calculateTotal(line).Rescale(2).String(),
+			ImporteUnitario:    unit,
+			Descuento:          discount,
+			ImporteTotal:       calculateTotal(line).Rescale(currencyDecimals).String(),
 		})
 	}
 
@@ -42,24 +51,45 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 	}
 }
 
-// newImporteUnitario renders the tax-excluded unit price.
+// newImporteUnitarioDescuento renders the tax-excluded unit price and discount
+// of a line, which the gateway uses to derive the line total as
+// `(ImporteUnitario x Cantidad - Descuento) x (1 + tipo)`.
 //
-// `ImporteUnitario` is an `ImporteSgn12.8Type`, and the specification asks for
-// as many decimals as are available: the amount is only rounded up to the two
-// decimals expected of a currency, never down to them. Removing included taxes
+// `ImporteUnitario` is an `ImporteSgn12.8Type` and the specification asks for
+// as many decimals as are available, so it is only rounded up to the two
+// decimals expected of a currency, never down to them: removing included taxes
 // leaves the price with more precision than the currency (a 15.00 price with
-// 21% VAT becomes 12.3967), and discarding it would leave `ImporteTotal`
-// unable to be derived from the unit price by the receiving gateway.
-func newImporteUnitario(line *bill.Line) string {
-	return line.Item.Price.RescaleRange(2, 8).String()
+// 21% VAT becomes 12.39669), and discarding it would leave the line total
+// unable to be derived. `Descuento` is an `ImporteSgn12.2Type` in the v1.2
+// schema this document declares, so it is held to two decimals.
+//
+// TicketBAI has no per-line charge. Charges are reported by reducing the
+// discount, which `Sum - Total` does on its own, but a line whose charges
+// outweigh its discounts would report a discount running against the line: a
+// surcharge rather than the discount the field is defined as. Such a charge is
+// folded into the unit price instead. Either arrangement satisfies the
+// gateway's arithmetic; only this one keeps both fields meaning what they say.
+//
+// A discount is "against the line" when its sign opposes the line total's, not
+// simply when it is negative: credit notes are inverted before conversion, so
+// every amount on them, discounts included, is negative already.
+func newImporteUnitarioDescuento(line *bill.Line) (unit, discount string) {
+	price := *line.Item.Price
+	amount := line.Sum.Subtract(*line.Total)
+
+	if isSurcharge(amount, *line.Total) && !line.Quantity.IsZero() {
+		price = line.Total.Rescale(maxAmountDecimals).Divide(line.Quantity)
+		amount = num.AmountZero
+	}
+
+	return price.RescaleRange(currencyDecimals, maxAmountDecimals).String(),
+		amount.Rescale(currencyDecimals).String()
 }
 
-// calculateDiscounts determines the per-line discount. Amounts are rescaled to
-// two decimals as required by the TicketBAI `ImporteSgn12.2Type` used for the
-// `Descuento` field; without this, invoices whose prices included tax would
-// emit the extra decimal places added while removing it.
-func calculateDiscounts(line *bill.Line) num.Amount {
-	return line.Sum.Subtract(*line.Total).Rescale(2)
+// isSurcharge reports whether a line's discount runs against the line total,
+// which happens when the line's charges outweigh its discounts.
+func isSurcharge(discount, total num.Amount) bool {
+	return !discount.IsZero() && discount.IsNegative() != total.IsNegative()
 }
 
 func calculateTotal(line *bill.Line) num.Amount {

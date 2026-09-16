@@ -201,6 +201,63 @@ func TestLines(t *testing.T) {
 		assert.Equal(t, "0.83", line.Descuento)
 	})
 
+	t.Run("should fold a line charge into the unit price rather than report a negative discount", func(t *testing.T) {
+		// TicketBAI has no per-line charge and Descuento is a discount, so a
+		// line whose charges outweigh its discounts must not report one that
+		// runs against the line.
+		inv := test.LoadInvoice("sample-invoice.json")
+		inv.Lines = []*bill.Line{{
+			Index:     1,
+			Quantity:  num.MakeAmount(2, 0),
+			Item:      &org.Item{Name: "A", Price: num.NewAmount(100, 0)},
+			Discounts: []*bill.LineDiscount{DiscountOf(10)},
+			Charges:   []*bill.LineCharge{{Reason: "Handling", Amount: num.MakeAmount(50, 0)}},
+			Taxes:     tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
+		}}
+		require.NoError(t, inv.Calculate())
+		// sum 200, less a 10 discount, plus a 50 charge.
+		require.Equal(t, "240.00", inv.Lines[0].Total.String())
+
+		out, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
+		require.NoError(t, err)
+
+		line := out.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
+		assert.Equal(t, "0.00", line.Descuento)
+		assert.Equal(t, "120.00000000", line.ImporteUnitario)
+		assert.Equal(t, "290.40", line.ImporteTotal)
+
+		// The gateway must still be able to derive the line total.
+		unit, err := num.AmountFromString(line.ImporteUnitario)
+		require.NoError(t, err)
+		derived := unit.
+			Multiply(num.MakeAmount(2, 0)).
+			Multiply(num.MakeAmount(121, 2)).
+			Rescale(2)
+		assert.Equal(t, derived.String(), line.ImporteTotal)
+	})
+
+	t.Run("should keep a discount that matches the direction of the line", func(t *testing.T) {
+		// Credit notes are inverted before conversion, so their discounts are
+		// negative without being surcharges.
+		inv := test.LoadInvoice("sample-invoice.json")
+		inv.Lines = []*bill.Line{{
+			Index:     1,
+			Quantity:  num.MakeAmount(2, 0),
+			Item:      &org.Item{Name: "A", Price: num.NewAmount(100, 0)},
+			Discounts: []*bill.LineDiscount{DiscountOf(10)},
+			Taxes:     tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
+		}}
+		require.NoError(t, inv.Calculate())
+		require.NoError(t, inv.Invert())
+
+		out, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
+		require.NoError(t, err)
+
+		line := out.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
+		assert.Equal(t, "-10.00", line.Descuento)
+		assert.Equal(t, "100.00", line.ImporteUnitario)
+	})
+
 	t.Run("should return error if more than 1000 lines included and not Vizcaya", func(t *testing.T) {
 		inv := test.LoadInvoice("sample-invoice.json")
 		inv.Lines = []*bill.Line{}

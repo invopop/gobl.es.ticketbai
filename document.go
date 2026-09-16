@@ -1,6 +1,7 @@
 package ticketbai
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/invopop/gobl"
@@ -39,6 +40,11 @@ func (c *Client) Convert(env *gobl.Envelope) (*convert.TicketBAI, error) {
 		return nil, ErrValidation.withMessage("invalid zone")
 	}
 
+	inv, err := prepareInvoice(inv)
+	if err != nil {
+		return nil, err
+	}
+
 	out, err := convert.NewTicketBAI(inv, c.CurrentTime(), c.issuerRole, zone)
 	if err != nil {
 		if _, ok := err.(*convert.ValidationError); ok {
@@ -49,6 +55,36 @@ func (c *Client) Convert(env *gobl.Envelope) (*convert.TicketBAI, error) {
 	}
 
 	return out, nil
+}
+
+// prepareInvoice readies an invoice for conversion by removing any taxes
+// included in its prices. TicketBAI reports unit prices and discounts without
+// tax, so an invoice whose prices include it would otherwise produce line
+// amounts that contradict the tax breakdown. Callers do not need to do this
+// themselves.
+//
+// The invoice is copied before being changed. The envelope reaching us is
+// normally signed and its digest covers the document, so the caller's copy has
+// to be left exactly as it was found.
+func prepareInvoice(inv *bill.Invoice) (*bill.Invoice, error) {
+	if inv.Tax == nil || inv.Tax.PricesInclude.IsEmpty() {
+		return inv, nil
+	}
+
+	data, err := json.Marshal(inv)
+	if err != nil {
+		return nil, ErrValidation.withCause(err).withMessage("copying invoice")
+	}
+	dup := new(bill.Invoice)
+	if err := json.Unmarshal(data, dup); err != nil {
+		return nil, ErrValidation.withCause(err).withMessage("copying invoice")
+	}
+
+	if err := dup.RemoveIncludedTaxes(); err != nil {
+		return nil, ErrValidation.withCause(err).withMessage("removing included taxes")
+	}
+
+	return dup, nil
 }
 
 // ZoneFor determines the zone of the envelope.

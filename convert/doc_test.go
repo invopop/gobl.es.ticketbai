@@ -241,20 +241,22 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Nil(t, invoice.Sujetos.Destinatarios)
 	})
 
-	t.Run("fail when charges are present since they aren't supported", func(t *testing.T) {
+	t.Run("fail when invoice charges are present since they belong to no line", func(t *testing.T) {
 		inv := test.LoadInvoice("sample-invoice.json")
-		inv.Lines[0].Charges = []*bill.LineCharge{{Amount: num.MakeAmount(100, 2)}}
+		inv.Charges = []*bill.Charge{{Amount: num.MakeAmount(100, 2)}}
 
 		_, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "charges are not supported")
+		assert.Contains(t, err.Error(), "invoice charges are not supported")
+	})
 
-		inv.Lines[0].Charges = nil
-		inv.Charges = []*bill.Charge{{Amount: num.MakeAmount(100, 2)}}
+	t.Run("accept line charges, which are reported through the unit price", func(t *testing.T) {
+		inv := test.LoadInvoice("sample-invoice.json")
+		inv.Lines[0].Charges = []*bill.LineCharge{{Amount: num.MakeAmount(100, 2)}}
+		require.NoError(t, inv.Calculate())
 
-		_, err = convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "charges are not supported")
+		_, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
+		require.NoError(t, err)
 	})
 }
 
