@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "019e3fdd-8a5f-7213-9f3b-84844f692fc5",
+		"uuid": "01a0aa6b-a8e5-7642-9fec-f7f3bb23f894",
 		"dig": {
 			"alg": "sha256",
-			"val": "1a5efc8ff07ae4f4aa630bba86d0c2f67bb749afb3a309dd192061758a3e0c01"
+			"val": "957b6e24b7963d4233a70c2851354738b1b76a6d6c9456bc1352ed273e181f57"
 		}
 	},
 	"doc": {
@@ -13,15 +13,20 @@
 		"$addons": [
 			"es-tbai-v1"
 		],
-		"uuid": "019e3fdd-8a5f-7213-9f3b-8485cf692b71",
+		"$tags": [
+			"simplified"
+		],
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fdd2927474c",
 		"type": "standard",
-		"series": "PASS",
-		"code": "0003",
-		"issue_date": "2024-07-19",
+		"series": "FS",
+		"code": "00000040",
+		"issue_date": "2024-05-21",
 		"currency": "EUR",
 		"tax": {
+			"prices_include": "VAT",
 			"ext": {
-				"es-tbai-region": "BI"
+				"es-tbai-region": "SS",
+				"es-tbai-simplified": "S"
 			}
 		},
 		"supplier": {
@@ -46,80 +51,91 @@
 				}
 			]
 		},
-		"customer": {
-			"name": "Jane Doe",
-			"identities": [
-				{
-					"country": "GB",
-					"key": "passport",
-					"code": "543210987",
-					"ext": {
-						"es-tbai-identity-type": "03"
-					}
-				}
-			]
-		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "2",
+				"quantity": "1",
 				"item": {
-					"key": "services",
-					"name": "Guided tour booking fee",
-					"price": "75.00"
+					"name": "Room",
+					"price": "15.000",
+					"ext": {
+						"es-tbai-product": "goods"
+					}
 				},
-				"sum": "150.00",
+				"sum": "15.000",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"country": "GB",
 						"key": "standard",
 						"rate": "general",
-						"percent": "20.0%",
+						"percent": "21.0%",
 						"ext": {
-							"es-tbai-exemption": "RL",
 							"es-tbai-product": "services",
 							"es-tbai-regime": "01"
 						}
 					}
 				],
-				"total": "150.00"
+				"total": "15.000"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Fees",
+					"price": "1.200",
+					"ext": {
+						"es-tbai-product": "services"
+					}
+				},
+				"sum": "1.200",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
+						}
+					}
+				],
+				"total": "1.200"
 			}
 		],
 		"totals": {
-			"sum": "150.00",
-			"total": "150.00",
+			"sum": "16.20",
+			"tax_included": "2.81",
+			"total": "13.39",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"country": "GB",
 								"key": "standard",
 								"ext": {
-									"es-tbai-exemption": "RL",
 									"es-tbai-product": "services",
 									"es-tbai-regime": "01"
 								},
-								"base": "150.00",
-								"percent": "20.0%",
-								"amount": "30.00"
+								"base": "13.39",
+								"percent": "21.0%",
+								"amount": "2.81"
 							}
 						],
-						"amount": "30.00"
+						"amount": "2.81"
 					}
 				],
-				"sum": "30.00"
+				"sum": "2.81"
 			},
-			"tax": "30.00",
-			"total_with_tax": "180.00",
-			"payable": "180.00"
+			"tax": "2.81",
+			"total_with_tax": "16.20",
+			"payable": "16.20"
 		},
 		"notes": [
 			{
 				"key": "general",
-				"text": "Tourist booking identified by passport."
+				"text": "Factura simplificada para el cliente"
 			}
 		]
 	}

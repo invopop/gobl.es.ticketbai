@@ -55,14 +55,12 @@ func validate(inv *bill.Invoice, zone l10n.Code) error {
 		}
 	}
 
-	for _, l := range inv.Lines {
-		if len(l.Charges) > 0 {
-			return validationErr("charges are not supported")
-		}
-	}
-
+	// Line charges are reported by folding them into the line's unit price, as
+	// TicketBAI has no field of its own for them. Charges on the invoice as a
+	// whole belong to no line and so cannot be represented at all: reporting
+	// them would leave the detail lines unable to add up to the invoice total.
 	if len(inv.Charges) > 0 {
-		return validationErr("charges are not supported")
+		return validationErr("invoice charges are not supported")
 	}
 
 	return nil

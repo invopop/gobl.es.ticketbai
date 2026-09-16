@@ -86,7 +86,7 @@ func (c *ArabaConn) Cancel(ctx context.Context, _ *bill.Invoice, doc *convert.An
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return c.post(ctx, arabaCancelPath, payload)
+	return asCancelDuplicate(c.post(ctx, arabaCancelPath, payload))
 }
 
 func (c *ArabaConn) post(ctx context.Context, path string, payload []byte) error {
