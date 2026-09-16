@@ -123,32 +123,42 @@ func newDescription(notes []*org.Note) (string, error) {
 	return "", validationErr(`notes: missing note with key '%s'`, org.NoteKeyGeneral)
 }
 
+// newImporteTotal determines the total amount of the invoice including any
+// non-retained taxes. Retained taxes are reported separately in
+// `RetencionSoportada`, so they are not subtracted here.
 func newImporteTotal(inv *bill.Invoice) string {
-	totalWithDiscounts := inv.Totals.Total
+	total := inv.Totals.Total
 
-	totalTaxes := num.MakeAmount(0, 2)
+	totalTaxes := num.AmountZero
 	if inv.Totals.Taxes != nil {
 		for _, category := range inv.Totals.Taxes.Categories {
 			if !category.Retained {
-				totalTaxes = totalTaxes.Add(category.Amount)
+				totalTaxes = totalTaxes.MatchPrecision(category.Amount).Add(category.Amount)
 			}
 		}
 	}
+	total = total.MatchPrecision(totalTaxes).Add(totalTaxes)
 
-	return totalWithDiscounts.Add(totalTaxes).String()
+	// Any rounding adjustment forms part of the amount the customer pays, so it
+	// must be reflected in the reported total.
+	if inv.Totals.Rounding != nil {
+		total = total.MatchPrecision(*inv.Totals.Rounding).Add(*inv.Totals.Rounding)
+	}
+
+	return total.Rescale(2).String()
 }
 
 func newRetencionSoportada(inv *bill.Invoice) string {
-	totalRetention := num.MakeAmount(0, 2)
+	totalRetention := num.AmountZero
 	if inv.Totals.Taxes != nil {
 		for _, category := range inv.Totals.Taxes.Categories {
 			if category.Retained {
-				totalRetention = totalRetention.Add(category.Amount)
+				totalRetention = totalRetention.MatchPrecision(category.Amount).Add(category.Amount)
 			}
 		}
 	}
 
-	return totalRetention.String()
+	return totalRetention.Rescale(2).String()
 }
 
 // newClaves returns the distinct ClaveRegimen codes from each VAT rate's

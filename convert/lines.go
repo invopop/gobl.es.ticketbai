@@ -42,8 +42,12 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 	}
 }
 
+// calculateDiscounts determines the per-line discount. Amounts are rescaled to
+// two decimals as required by the TicketBAI `ImporteSgn12.2Type` used for the
+// `Descuento` field; without this, invoices whose prices included tax would
+// emit the extra decimal places added while removing it.
 func calculateDiscounts(line *bill.Line) num.Amount {
-	return line.Sum.Subtract(*line.Total)
+	return line.Sum.Subtract(*line.Total).Rescale(2)
 }
 
 func calculateTotal(line *bill.Line) num.Amount {
@@ -52,14 +56,22 @@ func calculateTotal(line *bill.Line) num.Amount {
 	return line.Total.Add(taxes)
 }
 
+// calculateTaxes sums the non-retained taxes due on a line.
+//
+// The accumulator starts at zero with no decimal places, so every amount added
+// to it must be matched to its precision first: `num.Amount.Add` rounds its
+// argument to the receiver's exponent, which would otherwise round each tax
+// amount to whole units.
 func calculateTaxes(line *bill.Line) num.Amount {
-	total := num.MakeAmount(0, 0)
+	total := num.AmountZero
 	for _, t := range line.Taxes {
-		if regime.CategoryDef(t.Category).Retained {
+		cat := regime.CategoryDef(t.Category)
+		if cat == nil || cat.Retained {
 			continue
 		}
 		if t.Percent != nil {
-			total = total.Add(t.Percent.Of(*line.Total))
+			amount := t.Percent.Of(*line.Total)
+			total = total.MatchPrecision(amount).Add(amount)
 		}
 	}
 	return total

@@ -104,6 +104,25 @@ func TestFacturaConversion(t *testing.T) {
 		assert.Equal(t, "1210.00", factura.DatosFactura.ImporteTotalFactura)
 	})
 
+	t.Run("should include the rounding adjustment in the total of the invoice", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Lines = []*bill.Line{{
+			Index:    1,
+			Quantity: num.MakeAmount(100, 0),
+			Item:     &org.Item{Name: "A", Price: num.NewAmount(10, 0)},
+			Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
+		}}
+		goblInvoice.Totals = &bill.Totals{Rounding: num.NewAmount(-5, 2)}
+		require.NoError(t, goblInvoice.Calculate())
+		require.Equal(t, "1209.95", goblInvoice.Totals.Payable.String())
+
+		invoice, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+		require.NoError(t, err)
+
+		factura := invoice.Factura
+		assert.Equal(t, "1209.95", factura.DatosFactura.ImporteTotalFactura)
+	})
+
 	t.Run("should not include retained taxes (IRPF) to the total of the invoice", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Lines = []*bill.Line{{
