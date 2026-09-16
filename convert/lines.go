@@ -31,7 +31,7 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 		lines = append(lines, IDDetalleFactura{
 			DescripcionDetalle: line.Item.Name,
 			Cantidad:           line.Quantity.String(),
-			ImporteUnitario:    line.Item.Price.Rescale(2).String(),
+			ImporteUnitario:    newImporteUnitario(line),
 			Descuento:          calculateDiscounts(line).String(),
 			ImporteTotal:       calculateTotal(line).Rescale(2).String(),
 		})
@@ -40,6 +40,18 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 	return &DetallesFactura{
 		IDDetalleFactura: lines,
 	}
+}
+
+// newImporteUnitario renders the tax-excluded unit price.
+//
+// `ImporteUnitario` is an `ImporteSgn12.8Type`, and the specification asks for
+// as many decimals as are available: the amount is only rounded up to the two
+// decimals expected of a currency, never down to them. Removing included taxes
+// leaves the price with more precision than the currency (a 15.00 price with
+// 21% VAT becomes 12.3967), and discarding it would leave `ImporteTotal`
+// unable to be derived from the unit price by the receiving gateway.
+func newImporteUnitario(line *bill.Line) string {
+	return line.Item.Price.RescaleRange(2, 8).String()
 }
 
 // calculateDiscounts determines the per-line discount. Amounts are rescaled to

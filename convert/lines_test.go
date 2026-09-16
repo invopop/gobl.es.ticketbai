@@ -74,7 +74,7 @@ func TestLines(t *testing.T) {
 		out, _ := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
 
 		line := out.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
-		assert.Equal(t, "100.00", line.ImporteUnitario)
+		assert.Equal(t, "100.0000", line.ImporteUnitario)
 		assert.Equal(t, "1210.00", line.ImporteTotal)
 	})
 
@@ -130,9 +130,9 @@ func TestLines(t *testing.T) {
 		lines := datos.DetallesFactura.IDDetalleFactura
 		require.Len(t, lines, 2)
 
-		assert.Equal(t, "12.40", lines[0].ImporteUnitario)
+		assert.Equal(t, "12.39669", lines[0].ImporteUnitario)
 		assert.Equal(t, "15.00", lines[0].ImporteTotal)
-		assert.Equal(t, "0.99", lines[1].ImporteUnitario)
+		assert.Equal(t, "0.99174", lines[1].ImporteUnitario)
 		assert.Equal(t, "1.20", lines[1].ImporteTotal)
 		assert.Equal(t, "16.20", datos.ImporteTotalFactura)
 
@@ -144,6 +144,39 @@ func TestLines(t *testing.T) {
 			sum = sum.MatchPrecision(amount).Add(amount)
 		}
 		assert.Equal(t, datos.ImporteTotalFactura, sum.Rescale(2).String())
+	})
+
+	t.Run("should keep ImporteTotal derivable from ImporteUnitario at any quantity", func(t *testing.T) {
+		// TicketBAI validation 5018 recomputes each line's VAT rate from the
+		// reported amounts, so ImporteTotal must equal
+		// ImporteUnitario x Cantidad x (1 + rate). Rounding ImporteUnitario to
+		// the currency's two decimals broke that as soon as the quantity grew.
+		for _, quantity := range []int64{1, 10, 100} {
+			inv := test.LoadInvoice("invoice-es-es-tbai-simplified.json")
+			inv.Tax.PricesInclude = "VAT"
+			inv.Lines = []*bill.Line{{
+				Index:    1,
+				Quantity: num.MakeAmount(quantity, 0),
+				Item:     &org.Item{Name: "Room", Price: num.NewAmount(15000, 3)},
+				Taxes:    tax.Set{&tax.Combo{Category: tax.CategoryVAT, Rate: "standard"}},
+			}}
+			require.NoError(t, inv.Calculate())
+			require.NoError(t, inv.RemoveIncludedTaxes())
+
+			out, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneSS)
+			require.NoError(t, err)
+
+			line := out.Factura.DatosFactura.DetallesFactura.IDDetalleFactura[0]
+			unit, err := num.AmountFromString(line.ImporteUnitario)
+			require.NoError(t, err)
+
+			derived := unit.
+				Multiply(num.MakeAmount(quantity, 0)).
+				Multiply(num.MakeAmount(121, 2)).
+				Rescale(2)
+			assert.Equal(t, derived.String(), line.ImporteTotal,
+				"quantity %d: ImporteTotal must match the gateway's own calculation", quantity)
+		}
 	})
 
 	t.Run("should limit the discount to two decimal places", func(t *testing.T) {

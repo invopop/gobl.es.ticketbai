@@ -1,0 +1,140 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "01a0aa64-95e5-7649-86c0-52b65f70069c",
+		"dig": {
+			"alg": "sha256",
+			"val": "6302dc92c632df7300de5a78a62fa0ddf3a78fca7b14271dff1db512ce3b5462"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
+		"$tags": [
+			"simplified"
+		],
+		"uuid": "019e3fdd-8a5e-74f4-a259-5fdd2927474c",
+		"type": "standard",
+		"series": "FS",
+		"code": "00000040",
+		"issue_date": "2024-05-21",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"es-tbai-region": "SS",
+				"es-tbai-simplified": "S"
+			}
+		},
+		"supplier": {
+			"name": "ZIURTAPEN ZERBITZU ENPRESA-EMPRESA CERTIFICACION Y SERVICIOS IZENPE SA",
+			"tax_id": {
+				"country": "ES",
+				"code": "S7836107H"
+			},
+			"addresses": [
+				{
+					"num": "42",
+					"street": "San Frantzisko",
+					"locality": "Bilbo",
+					"region": "Bizkaia",
+					"code": "48003",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Room",
+					"price": "12.39669",
+					"ext": {
+						"es-tbai-product": "goods"
+					}
+				},
+				"sum": "12.39669",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
+						}
+					}
+				],
+				"total": "12.39669"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Fees",
+					"price": "0.99174",
+					"ext": {
+						"es-tbai-product": "services"
+					}
+				},
+				"sum": "0.99174",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
+						}
+					}
+				],
+				"total": "0.99174"
+			}
+		],
+		"totals": {
+			"sum": "13.39",
+			"total": "13.39",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
+								},
+								"base": "13.39",
+								"percent": "21.0%",
+								"amount": "2.81"
+							}
+						],
+						"amount": "2.81"
+					}
+				],
+				"sum": "2.81"
+			},
+			"tax": "2.81",
+			"total_with_tax": "16.20",
+			"payable": "16.20"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Factura simplificada para el cliente"
+			}
+		]
+	}
+}
