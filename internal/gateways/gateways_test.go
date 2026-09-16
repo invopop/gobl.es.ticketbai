@@ -90,7 +90,7 @@ func TestRegionalCancelDuplicate(t *testing.T) {
 			t.Run(name+"/"+row.code, func(t *testing.T) {
 				srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.Header().Set("Content-Type", "application/xml")
-					fmt.Fprintf(w, cancelRejectedResponse, row.code, row.message)
+					_, _ = fmt.Fprintf(w, cancelRejectedResponse, row.code, row.message)
 				}))
 				defer srv.Close()
 
