@@ -1,0 +1,124 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "01a0b4df-b3e5-7b71-9af4-744faf8f3232",
+		"dig": {
+			"alg": "sha256",
+			"val": "99bd8e4c8a73c240a3d6e65373b863d8b2d7a4785bc95bef35d33d4e5b36d666"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$addons": [
+			"es-tbai-v1"
+		],
+		"uuid": "c9dad188-6977-11f1-b904-72efd3e4964e",
+		"type": "standard",
+		"series": "ESC-PGSL-26",
+		"code": "011978",
+		"issue_date": "2026-06-16",
+		"currency": "EUR",
+		"tax": {
+			"prices_include": "VAT",
+			"ext": {
+				"es-tbai-region": "BI"
+			}
+		},
+		"supplier": {
+			"name": "Provider One SL",
+			"tax_id": {
+				"country": "ES",
+				"code": "B98577885"
+			},
+			"addresses": [
+				{
+					"num": "46",
+					"floor": "1º",
+					"door": "dcha",
+					"street": "Ventosa Bidea",
+					"locality": "Bilbao",
+					"region": "Vizcaya",
+					"code": "48013",
+					"country": "ES"
+				}
+			]
+		},
+		"customer": {
+			"name": "Producciones Ejemplo S.A. de C.V.",
+			"tax_id": {
+				"country": "MX",
+				"code": "AAA010101AAA"
+			},
+			"addresses": [
+				{
+					"street": "Cerrada de San Jeronimo 17",
+					"region": "Ciudad de Mexico",
+					"code": "10200",
+					"country": "MX"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "3",
+				"item": {
+					"name": "Concert ticket",
+					"price": "140.00"
+				},
+				"sum": "420.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "10.0%",
+						"ext": {
+							"es-tbai-product": "services",
+							"es-tbai-regime": "01"
+						}
+					}
+				],
+				"total": "420.00"
+			}
+		],
+		"ordering": {
+			"code": "110581761"
+		},
+		"totals": {
+			"sum": "420.00",
+			"tax_included": "38.18",
+			"total": "381.82",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"es-tbai-product": "services",
+									"es-tbai-regime": "01"
+								},
+								"base": "381.82",
+								"percent": "10.0%",
+								"amount": "38.18"
+							}
+						],
+						"amount": "38.18"
+					}
+				],
+				"sum": "38.18"
+			},
+			"tax": "38.18",
+			"total_with_tax": "420.00",
+			"payable": "420.00"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Factura completa"
+			}
+		]
+	}
+}

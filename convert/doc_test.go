@@ -101,6 +101,48 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Equal(t, "Abroad Co LLC", invoice.Sujetos.Destinatarios.IDDestinatario[0].ApellidosNombreRazonSocial)
 	})
 
+	t.Run("non-EU customer tax ID from a fixture keeps IDType 04", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("invoice-es-mx-tbai-foreign.json")
+
+		invoice, err := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		require.NoError(t, err)
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		require.NotNil(t, dest.IDOtro)
+		assert.Equal(t, "MX", dest.IDOtro.CodigoPais)
+		assert.Equal(t, "04", dest.IDOtro.IDType)
+		assert.Equal(t, "AAA010101AAA", dest.IDOtro.ID)
+	})
+
+	t.Run("Greek customer uses the ISO country code with an EL prefixed NIF-VAT", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = &tax.Identity{Country: "EL", Code: "094277965"}
+		goblInvoice.Customer.Name = "Hellenic Co AE"
+
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		require.NotNil(t, dest.IDOtro)
+		// "EL" is a tax-only code that the TicketBAI schema does not accept.
+		assert.Equal(t, "GR", dest.IDOtro.CodigoPais)
+		assert.Equal(t, "02", dest.IDOtro.IDType)
+		assert.Equal(t, "EL094277965", dest.IDOtro.ID)
+	})
+
+	t.Run("Northern Irish customer uses GB as the ISO country code", func(t *testing.T) {
+		goblInvoice := test.LoadInvoice("sample-invoice.json")
+		goblInvoice.Customer.TaxID = &tax.Identity{Country: "XI", Code: "123456789"}
+		goblInvoice.Customer.Name = "Ulster Co Ltd"
+
+		invoice, _ := convert.NewTicketBAI(goblInvoice, ts, role, convert.ZoneBI)
+
+		dest := invoice.Sujetos.Destinatarios.IDDestinatario[0]
+		require.NotNil(t, dest.IDOtro)
+		assert.Equal(t, "GB", dest.IDOtro.CodigoPais)
+		assert.Equal(t, "04", dest.IDOtro.IDType)
+		assert.Equal(t, "123456789", dest.IDOtro.ID)
+	})
+
 	t.Run("should not include customer if no tax ID present", func(t *testing.T) {
 		goblInvoice := test.LoadInvoice("sample-invoice.json")
 		goblInvoice.Customer.TaxID = nil
