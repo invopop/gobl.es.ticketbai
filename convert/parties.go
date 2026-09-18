@@ -76,14 +76,16 @@ func newDestinatario(party *org.Party) *IDDestinatario {
 
 func otherIdentity(party *org.Party) *IDOtro {
 	if party.TaxID != nil && party.TaxID.Code != "" {
-		country := party.TaxID.Country.String()
-		idType := taxIDType(party.TaxID.Country)
+		country := party.TaxID.Country
+		idType := taxIDType(country)
 		id := party.TaxID.Code.String()
-		if idType == tbai.ExtCodeIdentityTypeVAT.String() && !strings.HasPrefix(id, country) {
-			id = country + id
+		if idType == tbai.ExtCodeIdentityTypeVAT.String() && !strings.HasPrefix(id, country.String()) {
+			// NIF-VAT numbers carry the tax country prefix, which for Greece
+			// is "EL" and not the ISO code.
+			id = country.String() + id
 		}
 		return &IDOtro{
-			CodigoPais: country,
+			CodigoPais: isoCountry(country).String(),
 			IDType:     idType,
 			ID:         id,
 		}
@@ -100,7 +102,7 @@ func otherIdentity(party *org.Party) *IDOtro {
 	case id.Country != "":
 		oid.CodigoPais = id.Country.String()
 	case party.TaxID != nil:
-		oid.CodigoPais = party.TaxID.Country.String()
+		oid.CodigoPais = isoCountry(party.TaxID.Country).String()
 	}
 	return oid
 }
@@ -113,6 +115,18 @@ func taxIDType(country l10n.TaxCountryCode) string {
 		return tbai.ExtCodeIdentityTypeVAT.String()
 	}
 	return tbai.ExtCodeIdentityTypeForeign.String()
+}
+
+// isoCountry maps a GOBL tax country code to the ISO 3166-1 alpha-2 code
+// expected by TicketBAI's CodigoPais field. Most of them coincide, but GOBL
+// uses tax-only codes for Greece ("EL") and the two parts of the United
+// Kingdom ("XI" and "XU"), none of which the TicketBAI schema accepts.
+func isoCountry(country l10n.TaxCountryCode) l10n.Code {
+	d := l10n.Countries().Code(country.Code())
+	if d != nil && !d.ISO && d.AltCode != "" {
+		return d.AltCode
+	}
+	return country.Code()
 }
 
 func partyCountry(party *org.Party) l10n.TaxCountryCode {
