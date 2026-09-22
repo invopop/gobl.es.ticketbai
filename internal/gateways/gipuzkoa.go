@@ -95,7 +95,10 @@ func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) er
 	req := c.client.R().
 		SetContext(ctx).
 		SetDebug(true).
-		SetHeader("Content-Type", "application/xml").
+		// The charset must be declared explicitly. Without it the remote end
+		// decodes the body as ISO-8859-1, which mangles any non-ASCII character
+		// and breaks the XAdES SignedProperties digest.
+		SetHeader("Content-Type", "application/xml; charset=UTF-8").
 		SetContentLength(true).
 		SetBody(payload).
 		SetResult(out)
