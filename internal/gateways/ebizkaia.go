@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"net/http"
 	"slices"
 
 	"github.com/go-resty/resty/v2"
@@ -102,12 +103,13 @@ func (c *EBizkaiaConn) Post(ctx context.Context, inv *bill.Invoice, doc *convert
 
 	err = c.sendRequest(ctx, req, eBizkaiaExecutePath, resp)
 	if errors.Is(err, ErrValidation) {
-		if resp.FirstErrorCode() == eBizkaiaN3RespCodeDuplicated {
-			return ErrDuplicate
+		code := resp.FirstErrorCode()
+		if code == eBizkaiaN3RespCodeDuplicated {
+			return ErrDuplicate.withCode(code).withMessage(resp.FirstErrorDescription())
 		}
 
 		if resp.FirstErrorDescription() != "" {
-			return ErrValidation.withCode(resp.FirstErrorCode()).withMessage(resp.FirstErrorDescription())
+			return ErrValidation.withCode(code).withMessage(resp.FirstErrorDescription())
 		}
 	}
 
@@ -181,22 +183,24 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 	if err != nil {
 		return ErrConnection.withCause(err)
 	}
-	if res.StatusCode() != 200 {
-		return ErrConnection.withCode(fmt.Sprintf("%d", res.StatusCode()))
-	}
 
-	code := res.Header().Get(eBizkaiaN3ResponseHeader)
-	if code == eBizkaiaN3ResponseInvalid {
+	// Always prefer the outcome reported in the headers, it describes the
+	// problem in much more detail than the status code alone.
+	if res.Header().Get(eBizkaiaN3ResponseHeader) == eBizkaiaN3ResponseInvalid {
 		msg := res.Header().Get(eBizkaiaN3MessageHeader)
 		msg = convertToUTF8(msg)
 
 		code := res.Header().Get(eBizkaiaN3RespCodeHeader)
-		if !slices.Contains(serverErrors, code) {
-			// Not a server-side error, so the cause of it is in the request. We identify
-			// it as an ErrInvalidRequest to handle it downstream.
-			return ErrValidation.withCode(code).withMessage(msg)
+		if slices.Contains(serverErrors, code) {
+			// Something went wrong inside the gateway, the request may be
+			// worth sending again later.
+			return ErrServer.withCode(code).withMessage(msg)
 		}
-		return ErrConnection.withCode(code).withMessage(msg)
+		// Not a server-side error, so the cause of it is in the request.
+		return ErrValidation.withCode(code).withMessage(msg)
+	}
+	if res.StatusCode() != http.StatusOK {
+		return statusError(res)
 	}
 
 	return nil

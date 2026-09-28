@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/invopop/gobl.ticketbai/convert"
@@ -48,6 +47,17 @@ type GipuzkoaResponse struct {
 		} `xml:"ResultadosValidacion"`
 		CSV string `xml:"CSV"` // Secure Verification Code
 	} `xml:"Salida"`
+}
+
+// Err converts a response that was not accepted into a structured error. The
+// code and description of the first validation result are used when present,
+// otherwise the general description of the outcome.
+func (r *GipuzkoaResponse) Err() *Error {
+	if len(r.Output.Errors) > 0 {
+		e1 := r.Output.Errors[0]
+		return ErrValidation.withCode(e1.Code).withMessage(e1.Description)
+	}
+	return ErrValidation.withMessage(r.Output.Description)
 }
 
 // GipuzkoaConn keeps all the connection details together for the Gipuzkoa region.
@@ -101,23 +111,22 @@ func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) er
 		SetHeader("Content-Type", "application/xml; charset=UTF-8").
 		SetContentLength(true).
 		SetBody(payload).
-		SetResult(out)
+		SetResult(out).
+		// Rejections may also be sent alongside an error status code, and
+		// will only be parsed if we define them as the error result.
+		SetError(out)
 
 	res, err := req.Post(path)
 	if err != nil {
 		return ErrConnection.withCause(err)
 	}
-	if res.StatusCode() != http.StatusOK {
-		return ErrValidation.withCode(strconv.Itoa(res.StatusCode()))
+	// Always prefer the parsed response, it describes the problem in much
+	// more detail than the status code alone.
+	if out.Output.Status != "" && out.Output.Status != gipuzkoaStatusReceived {
+		return out.Err()
 	}
-
-	if out.Output.Status != gipuzkoaStatusReceived {
-		err := ErrValidation
-		if len(out.Output.Errors) > 0 {
-			e1 := out.Output.Errors[0]
-			err = err.withMessage(e1.Description).withCode(e1.Code)
-		}
-		return err
+	if res.StatusCode() != http.StatusOK {
+		return statusError(res)
 	}
 
 	return nil
