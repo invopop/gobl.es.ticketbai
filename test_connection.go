@@ -3,8 +3,8 @@ package ticketbai
 import (
 	"context"
 
-	"github.com/invopop/gobl.ticketbai/convert"
-	"github.com/invopop/gobl.ticketbai/internal/gateways"
+	"github.com/invopop/gobl.es.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/bill"
 )
 

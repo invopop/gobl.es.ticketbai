@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/invopop/gobl"
-	ticketbai "github.com/invopop/gobl.ticketbai"
-	convert1 "github.com/invopop/gobl.ticketbai/convert"
+	ticketbai "github.com/invopop/gobl.es.ticketbai"
+	convert1 "github.com/invopop/gobl.es.ticketbai/convert"
 	"github.com/invopop/xmldsig"
 	"github.com/spf13/cobra"
 )

@@ -4,8 +4,8 @@ import (
 	"io"
 	"os"
 
-	ticketbai "github.com/invopop/gobl.ticketbai"
-	"github.com/invopop/gobl.ticketbai/internal/gateways"
+	ticketbai "github.com/invopop/gobl.es.ticketbai"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/l10n"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/spf13/cobra"

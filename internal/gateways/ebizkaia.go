@@ -8,8 +8,8 @@ import (
 	"slices"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/invopop/gobl.ticketbai/convert"
-	"github.com/invopop/gobl.ticketbai/internal/gateways/ebizkaia"
+	"github.com/invopop/gobl.es.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways/ebizkaia"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/regimes/es"

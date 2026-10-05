@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/invopop/gobl.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/convert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

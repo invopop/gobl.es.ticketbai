@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/invopop/gobl.ticketbai/convert"
-	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl.es.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/test"
 	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

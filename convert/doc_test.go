@@ -7,8 +7,8 @@ import (
 
 	"github.com/nbio/xml"
 
-	"github.com/invopop/gobl.ticketbai/convert"
-	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl.es.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/test"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"

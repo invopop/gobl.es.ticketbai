@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/invopop/gobl.ticketbai/ca"
-	"github.com/invopop/gobl.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/ca"
+	"github.com/invopop/gobl.es.ticketbai/convert"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"

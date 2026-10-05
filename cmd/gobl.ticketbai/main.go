@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/invopop/gobl.ticketbai/internal/gateways"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways"
 )
 
 // build data provided by goreleaser and mage setup
