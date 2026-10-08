@@ -1,4 +1,4 @@
-module github.com/invopop/gobl.ticketbai
+module github.com/invopop/gobl.es.ticketbai
 
 go 1.26.6
 

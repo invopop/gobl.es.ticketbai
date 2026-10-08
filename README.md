@@ -41,7 +41,7 @@ import (
 	"os"
 
 	"github.com/invopop/gobl"
-	ticketbai "github.com/invopop/gobl.ticketbai"
+	ticketbai "github.com/invopop/gobl.es.ticketbai"
 	"github.com/invopop/xmldsig"
 )
 
@@ -126,10 +126,10 @@ func main() {
 
 ## Command Line
 
-The GOBL TicketBAI package tool also includes a command line helper. You can find pre-built [gobl.cfdi binaries](https://github.com/invopop/gobl.ticketbai/releases) in the github repository, or install manually in your Go environment with:
+The GOBL TicketBAI package tool also includes a command line helper. You can find pre-built [gobl.cfdi binaries](https://github.com/invopop/gobl.es.ticketbai/releases) in the github repository, or install manually in your Go environment with:
 
 ```bash
-go install github.com/invopop/gobl.ticketbai
+go install github.com/invopop/gobl.es.ticketbai
 ```
 
 We recommend using a `.env` file to prepare configuration settings, although all parameters can be set using command line flags. Heres an example:

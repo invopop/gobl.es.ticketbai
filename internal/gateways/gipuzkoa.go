@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/invopop/gobl.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/convert"
 	"github.com/invopop/gobl/bill"
 )
 

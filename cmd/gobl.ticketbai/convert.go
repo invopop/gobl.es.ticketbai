@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/invopop/gobl"
-	ticketbai "github.com/invopop/gobl.ticketbai"
+	ticketbai "github.com/invopop/gobl.es.ticketbai"
 	"github.com/spf13/cobra"
 )
 
