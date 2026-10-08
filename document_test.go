@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -65,5 +67,79 @@ func TestConvertRemovesIncludedTaxes(t *testing.T) {
 		assert.Equal(t, "15.000", inv.Lines[0].Item.Price.String())
 		assert.Equal(t, "16.20", inv.Totals.Sum.String())
 		require.NoError(t, env.Validate(), "envelope digest must still match")
+	})
+}
+
+func TestConvertCreditNotes(t *testing.T) {
+	tbai, err := loadTBAIClient()
+	require.NoError(t, err)
+
+	t.Run("negates the amounts", func(t *testing.T) {
+		env := test.LoadEnvelope("credit-note-es-es-tbai.json")
+
+		doc, err := tbai.Convert(env)
+		require.NoError(t, err)
+
+		lines := doc.Factura.DatosFactura.DetallesFactura.IDDetalleFactura
+		require.Len(t, lines, 2)
+		assert.Equal(t, "-20", lines[0].Cantidad)
+		assert.Equal(t, "90.00", lines[0].ImporteUnitario)
+		assert.Equal(t, "-180.00", lines[0].Descuento)
+		assert.Equal(t, "-1960.20", lines[0].ImporteTotal)
+		assert.Equal(t, "-1965.20", doc.Factura.DatosFactura.ImporteTotalFactura)
+		iva := doc.Factura.TipoDesglose.DesgloseFactura.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA.DetalleIVA[0]
+		assert.Equal(t, "-1620.00", iva.BaseImponible)
+		assert.Equal(t, "21.00", iva.TipoImpositivo)
+		assert.Equal(t, "-340.20", iva.CuotaImpuesto)
+	})
+
+	t.Run("leaves the caller's envelope untouched", func(t *testing.T) {
+		env := test.LoadEnvelope("credit-note-es-es-tbai.json")
+
+		_, err := tbai.Convert(env)
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		assert.Equal(t, "20", inv.Lines[0].Quantity.String())
+		assert.Equal(t, "1965.20", inv.Totals.Payable.String())
+		require.NoError(t, env.Validate(), "envelope digest must still match")
+	})
+
+	t.Run("uses the totals provided with the bypass tag", func(t *testing.T) {
+		env := test.LoadEnvelope("credit-note-es-es-tbai.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.SetTags(tax.TagBypass)
+		// Totals that would not survive a recalculation
+		cat := inv.Totals.Taxes.Categories[0]
+		cat.Rates[0].Amount = num.MakeAmount(34021, 2)
+		cat.Amount = cat.Rates[0].Amount
+		inv.Totals.Taxes.Sum = cat.Amount
+		inv.Totals.Tax = cat.Amount
+		inv.Totals.TotalWithTax = num.MakeAmount(196521, 2)
+		inv.Totals.Payable = inv.Totals.TotalWithTax
+
+		doc, err := tbai.Convert(env)
+		require.NoError(t, err)
+
+		assert.Equal(t, "-1965.21", doc.Factura.DatosFactura.ImporteTotalFactura)
+		iva := doc.Factura.TipoDesglose.DesgloseFactura.Sujeta.NoExenta.DetalleNoExenta[0].DesgloseIVA.DetalleIVA[0]
+		assert.Equal(t, "-340.21", iva.CuotaImpuesto)
+		assert.Equal(t, "1965.21", inv.Totals.Payable.String())
+	})
+
+	t.Run("keeps the rounding provided", func(t *testing.T) {
+		env := test.LoadEnvelope("credit-note-es-es-tbai.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		rounding := num.MakeAmount(-2, 2)
+		inv.Totals.Rounding = &rounding
+		require.NoError(t, env.Calculate())
+
+		doc, err := tbai.Convert(env)
+		require.NoError(t, err)
+
+		assert.Equal(t, "-1965.18", doc.Factura.DatosFactura.ImporteTotalFactura)
 	})
 }
