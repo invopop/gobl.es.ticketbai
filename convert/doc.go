@@ -80,16 +80,14 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 		return nil, err
 	}
 
-	if inv.Type == bill.InvoiceTypeCreditNote {
-		// GOBL credit note's amounts represent the amounts to be credited to the customer,
-		// and they are provided as positive numbers. In TicketBAI, however, credit notes
-		// become "facturas rectificativas por diferencias" and, when a correction is for a
-		// credit operation, the amounts must be negative to cancel out the ones in the
-		// original invoice. For that reason, we invert the credit note quantities here.
-		if err := inv.Invert(); err != nil {
-			return nil, err
-		}
-	}
+	// GOBL credit note's amounts represent the amounts to be credited to the customer,
+	// and they are provided as positive numbers. In TicketBAI, however, credit notes
+	// become "facturas rectificativas por diferencias" and, when a correction is for a
+	// credit operation, the amounts must be negative to cancel out the ones in the
+	// original invoice. The amounts are negated as they are output instead of inverting
+	// and recalculating the invoice, so that the source document is left untouched and
+	// the original totals are used as provided, including with the bypass tag.
+	negate := inv.Type == bill.InvoiceTypeCreditNote
 
 	doc := &TicketBAI{
 		TNamespace: ticketBAIEmisionNamespace,
@@ -102,7 +100,7 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 		},
 		Factura: &Factura{
 			CabeceraFactura: newCabeceraFactura(inv),
-			TipoDesglose:    newTipoDesglose(inv),
+			TipoDesglose:    newTipoDesglose(inv, negate),
 		},
 	}
 
@@ -120,7 +118,7 @@ func NewTicketBAI(inv *bill.Invoice, ts time.Time, role IssuerRole, zone l10n.Co
 	}
 
 	// Complete invoice data
-	doc.Factura.DatosFactura, err = newDatosFactura(inv)
+	doc.Factura.DatosFactura, err = newDatosFactura(inv, negate)
 	if err != nil {
 		return nil, err
 	}

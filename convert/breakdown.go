@@ -88,7 +88,7 @@ type DetalleNoSujeta struct {
 	Importe num.Amount
 }
 
-func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
+func newTipoDesglose(gobl *bill.Invoice, negate bool) *TipoDesglose {
 	if gobl.Totals == nil || gobl.Totals.Taxes == nil {
 		return nil
 	}
@@ -100,20 +100,20 @@ func newTipoDesglose(gobl *bill.Invoice) *TipoDesglose {
 	desglose := &TipoDesglose{}
 
 	if gobl.Customer == nil || partyCountry(gobl.Customer) == l10n.ES.Tax() || isSimplified(gobl) {
-		desglose.DesgloseFactura = newDesgloseFactura(catTotal.Rates)
+		desglose.DesgloseFactura = newDesgloseFactura(catTotal.Rates, negate)
 	} else {
 		goods, services := splitByTBAIProduct(catTotal.Rates)
 
 		desglose.DesgloseTipoOperacion = &DesgloseTipoOperacion{
-			Entrega:             newDesgloseFactura(goods),
-			PrestacionServicios: newDesgloseFactura(services),
+			Entrega:             newDesgloseFactura(goods, negate),
+			PrestacionServicios: newDesgloseFactura(services, negate),
 		}
 	}
 
 	return desglose
 }
 
-func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
+func newDesgloseFactura(rates []*tax.RateTotal, negate bool) *DesgloseFactura {
 	if len(rates) == 0 {
 		return nil
 	}
@@ -132,12 +132,12 @@ func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
 		case code.In(notSubjectExemptionCodes...):
 			df.NoSujeta.appendDetalle(&DetalleNoSujeta{
 				Causa:   code.String(),
-				Importe: rate.Base,
+				Importe: signed(rate.Base, negate),
 			})
 		case code.In(exemptExemptionCodes...):
 			df.Sujeta.Exenta.appendDetalle(&DetalleExenta{
 				CausaExencion: code.String(),
-				BaseImponible: rate.Base.Rescale(2).String(),
+				BaseImponible: signed(rate.Base, negate).Rescale(2).String(),
 			})
 		default:
 			if code.IsEmpty() {
@@ -147,7 +147,7 @@ func newDesgloseFactura(rates []*tax.RateTotal) *DesgloseFactura {
 				TipoNoExenta: code.String(),
 				DesgloseIVA:  &DesgloseIVA{},
 			})
-			dne.DesgloseIVA.appendDetalle(newDetalleIVA(rate))
+			dne.DesgloseIVA.appendDetalle(newDetalleIVA(rate, negate))
 		}
 	}
 
@@ -214,20 +214,20 @@ func (di *DesgloseIVA) appendDetalle(d *DetalleIVA) *DetalleIVA {
 	return d
 }
 
-func newDetalleIVA(rate *tax.RateTotal) *DetalleIVA {
+func newDetalleIVA(rate *tax.RateTotal, negate bool) *DetalleIVA {
 	percent := num.PercentageZero
 	if rate.Percent != nil {
 		percent = *rate.Percent
 	}
 	diva := &DetalleIVA{
-		BaseImponible:  rate.Base.Rescale(2).String(),
+		BaseImponible:  signed(rate.Base, negate).Rescale(2).String(),
 		TipoImpositivo: formatPercent(percent),
-		CuotaImpuesto:  rate.Amount.Rescale(2).String(),
+		CuotaImpuesto:  signed(rate.Amount, negate).Rescale(2).String(),
 	}
 
 	if rate.Surcharge != nil {
 		diva.TipoRecargoEquivalencia = formatPercent(rate.Surcharge.Percent)
-		diva.CuotaRecargoEquivalencia = rate.Surcharge.Amount.Rescale(2).String()
+		diva.CuotaRecargoEquivalencia = signed(rate.Surcharge.Amount, negate).Rescale(2).String()
 	}
 
 	if rate.Ext.Get(tbai.ExtKeyRegime) == "52" || rate.Ext.Get(tbai.ExtKeyProduct) == tbai.ExtValueProductResale {
