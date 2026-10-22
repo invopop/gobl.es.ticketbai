@@ -108,9 +108,9 @@ func TestRegionalCancelDuplicate(t *testing.T) {
 	}
 }
 
-// TestRegionalZuzendu ensures the regional gateways send Zuzendu documents to
-// the right service and identify corrections that were already registered.
-func TestRegionalZuzendu(t *testing.T) {
+// TestRegionalAmendment ensures the regional gateways send amendments to the
+// right service and identify amendments that were already registered.
+func TestRegionalAmendment(t *testing.T) {
 	conns := map[string]struct {
 		new        func(*tls.Config, string) Connection
 		altaPath   string
@@ -138,10 +138,10 @@ func TestRegionalZuzendu(t *testing.T) {
 
 	send := map[string]func(Connection) error{
 		"alta": func(c Connection) error {
-			return c.PostZuzendu(context.Background(), nil, new(convert.ZuzenduAlta))
+			return c.PostAmendment(context.Background(), nil, new(convert.Amendment))
 		},
 		"cancel": func(c Connection) error {
-			return c.CancelZuzendu(context.Background(), nil, new(convert.ZuzenduAnula))
+			return c.CancelAmendment(context.Background(), nil, new(convert.CancelAmendment))
 		},
 	}
 
@@ -182,8 +182,8 @@ func TestRegionalZuzendu(t *testing.T) {
 	}
 }
 
-func TestEBizkaiaZuzendu(t *testing.T) {
+func TestEBizkaiaAmendment(t *testing.T) {
 	c := newEbizkaia(EnvironmentSandbox, new(tls.Config))
-	assert.ErrorIs(t, c.PostZuzendu(context.Background(), nil, nil), ErrValidation)
-	assert.ErrorIs(t, c.CancelZuzendu(context.Background(), nil, nil), ErrValidation)
+	assert.ErrorIs(t, c.PostAmendment(context.Background(), nil, nil), ErrValidation)
+	assert.ErrorIs(t, c.CancelAmendment(context.Background(), nil, nil), ErrValidation)
 }

@@ -124,28 +124,28 @@ func main() {
 }
 ```
 
-### Resending with the Zuzendu service
+### Amending issued invoices
 
-Gipuzkoa and Araba offer the Zuzendu service to resend an invoice that was already issued, for example to fix technical issues, without issuing a corrective invoice. Zuzendu documents are not signed: they reuse the fingerprint and signature of the original TicketBAI document, so the invoice keeps its TicketBAI code and QR. You'll need the original signed XML document, and the envelope with any corrected details:
+Gipuzkoa and Araba allow an invoice that was already issued to be resent, for example to fix technical issues, without issuing a corrective invoice. These amendments are sent through the agencies' "Zuzendu" service (Basque for "to correct"). Amendments are not signed: they reuse the fingerprint and signature of the original TicketBAI document, so the invoice keeps its TicketBAI code and QR. You'll need the original signed XML document, and the envelope with any corrected details:
 
-- `ticketbai.ZuzenduCorrect` ("subsanar") resends an invoice that was rejected, and so never registered.
-- `ticketbai.ZuzenduModify` ("modificar") replaces the details of an invoice that was received with errors. Basic invoice data cannot be modified in this way, and still requires a corrective invoice.
+- `ticketbai.AmendRejected` ("subsanar") resends an invoice that was rejected, and so never registered.
+- `ticketbai.AmendReceived` ("modificar") replaces the details of an invoice that was received with errors. Basic invoice data cannot be modified in this way, and still requires a corrective invoice.
 
 ```go
 orig, err := ticketbai.ParseDocument(origXML)
 if err != nil {
 	panic(err)
 }
-zd, err := tc.GenerateZuzendu(env, orig, ticketbai.ZuzenduCorrect)
+ad, err := tc.GenerateAmendment(env, orig, ticketbai.AmendRejected)
 if err != nil {
 	panic(err)
 }
-if err := tc.PostZuzendu(ctx, env, zd); err != nil {
+if err := tc.PostAmendment(ctx, env, ad); err != nil {
 	panic(err) // ticketbai.ErrDuplicate if already registered
 }
 ```
 
-Rejected cancellations can be resent in the same way using `GenerateZuzenduCancel` and `CancelZuzendu` with the original signed cancellation document. The Zuzendu service is not available in Bizkaia.
+Rejected cancellations can be resent in the same way using `GenerateCancelAmendment` and `CancelAmendment` with the original signed cancellation document. Amendments are not available in Bizkaia.
 
 ## Command Line
 

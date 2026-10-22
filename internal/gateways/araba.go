@@ -27,8 +27,8 @@ const (
 	arabaExecutePath = "/TicketBAI/v1/facturas/"
 	arabaCancelPath  = "/TicketBAI/v1/anulaciones/"
 
-	arabaZuzenduAltaPath = "/TicketBAI/v1/facturas/subsanarmodificar"
-	arabaZuzenduBajaPath = "/TicketBAI/v1/anulaciones/baja"
+	arabaAmendmentPath       = "/TicketBAI/v1/facturas/subsanarmodificar"
+	arabaCancelAmendmentPath = "/TicketBAI/v1/anulaciones/baja"
 )
 
 const (
@@ -93,24 +93,24 @@ func (c *ArabaConn) Cancel(ctx context.Context, _ *bill.Invoice, doc *convert.An
 	return asCancelDuplicate(c.post(ctx, arabaCancelPath, payload))
 }
 
-// PostZuzendu sends a correction or modification of a previously issued
+// PostAmendment sends a correction or modification of a previously issued
 // document to the Araba Zuzendu service.
-func (c *ArabaConn) PostZuzendu(ctx context.Context, _ *bill.Invoice, doc *convert.ZuzenduAlta) error {
+func (c *ArabaConn) PostAmendment(ctx context.Context, _ *bill.Invoice, doc *convert.Amendment) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return asDuplicate(c.post(ctx, arabaZuzenduAltaPath, payload), codeZuzenduAltaRegistered)
+	return asDuplicate(c.post(ctx, arabaAmendmentPath, payload), codeAmendmentRegistered)
 }
 
-// CancelZuzendu sends a correction of a previously rejected cancellation to the
+// CancelAmendment sends a correction of a previously rejected cancellation to the
 // Araba Zuzendu service.
-func (c *ArabaConn) CancelZuzendu(ctx context.Context, _ *bill.Invoice, doc *convert.ZuzenduAnula) error {
+func (c *ArabaConn) CancelAmendment(ctx context.Context, _ *bill.Invoice, doc *convert.CancelAmendment) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return asDuplicate(c.post(ctx, arabaZuzenduBajaPath, payload), codeZuzenduAnulaRegistered)
+	return asDuplicate(c.post(ctx, arabaCancelAmendmentPath, payload), codeCancelAmendmentRegistered)
 }
 
 func (c *ArabaConn) post(ctx context.Context, path string, payload []byte) error {

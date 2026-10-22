@@ -4,9 +4,10 @@ import (
 	"encoding/xml"
 )
 
-// Zuzendu is the correction service offered by the Gipuzkoa and Araba regions
-// to resend TicketBAI documents that were rejected, or to modify those that were
-// received with errors. Zuzendu documents are not signed. Instead they include
+// Amendments resend TicketBAI documents that were rejected, or modify those that
+// were received with errors, without issuing a corrective invoice. They are sent
+// through the "Zuzendu" service (Basque for "to correct") offered by the
+// Gipuzkoa and Araba regions. Amendments are not signed. Instead they include
 // the fingerprint and the first 100 characters of the signature of the original
 // document, which means the TicketBAI code and QR of the invoice do not change.
 //
@@ -14,64 +15,64 @@ import (
 //  * Araba: https://web.araba.eus/es/hacienda/ticketbai/documentacion-tecnica
 
 const (
-	zuzenduVersion = "1.0"
+	amendmentVersion = "1.0"
 
-	zuzenduAltaNamespace = "urn:ticketbai:zuzendu-alta"
-	zuzenduBajaNamespace = "urn:ticketbai:zuzendu-baja"
+	amendmentNamespace       = "urn:ticketbai:zuzendu-alta"
+	cancelAmendmentNamespace = "urn:ticketbai:zuzendu-baja"
 )
 
-// ZuzenduAction defines what is being requested when sending an alta document
-// through the Zuzendu service.
-type ZuzenduAction string
+// AmendmentAction defines what is being requested when sending an alta document
+// as an amendment.
+type AmendmentAction string
 
-// ZuzenduAction constants
+// AmendmentAction constants
 const (
-	// ZuzenduCorrect ("SUBSANAR") resends an alta document that was rejected,
+	// AmendRejected ("SUBSANAR") resends an alta document that was rejected,
 	// and so never registered by the tax agency.
-	ZuzenduCorrect ZuzenduAction = "SUBSANAR"
-	// ZuzenduModify ("MODIFICAR") replaces the data of an alta document, or of a
+	AmendRejected AmendmentAction = "SUBSANAR"
+	// AmendReceived ("MODIFICAR") replaces the data of an alta document, or of a
 	// previous correction, that was received by the tax agency with errors.
-	ZuzenduModify ZuzenduAction = "MODIFICAR"
+	AmendReceived AmendmentAction = "MODIFICAR"
 )
 
-// ZuzenduAlta contains the data needed to correct or modify a TicketBAI invoice.
-type ZuzenduAlta struct {
+// Amendment contains the data needed to correct or modify a TicketBAI invoice.
+type Amendment struct {
 	XMLName    xml.Name `xml:"T:SubsanacionModificacionTicketBAI"`
 	TNamespace string   `xml:"xmlns:T,attr"`
 
-	Cabecera                   *ZuzenduCabecera
+	Cabecera                   *AmendmentCabecera
 	Sujetos                    *Sujetos
 	Factura                    *Factura
 	HuellaTBAI                 *HuellaTBAI
 	SignatureValueFirmaFactura string
 }
 
-// ZuzenduAnula contains the data needed to correct a TicketBAI cancellation
+// CancelAmendment contains the data needed to correct a TicketBAI cancellation
 // that was rejected.
-type ZuzenduAnula struct {
+type CancelAmendment struct {
 	XMLName    xml.Name `xml:"T:SubsanacionAnulacionTicketBAI"`
 	TNamespace string   `xml:"xmlns:T,attr"`
 
-	Cabecera                     *ZuzenduCabecera
+	Cabecera                     *AmendmentCabecera
 	IDFactura                    *IDFactura
 	HuellaTBAI                   *HuellaTBAI
 	SignatureValueFirmaAnulacion string
 }
 
-// ZuzenduCabecera defines the head of Zuzendu documents. The action is only
+// AmendmentCabecera defines the head of amendment documents. The action is only
 // used by alta documents.
-type ZuzenduCabecera struct {
+type AmendmentCabecera struct {
 	IDVersion string
-	Accion    ZuzenduAction `xml:",omitempty"`
+	Accion    AmendmentAction `xml:",omitempty"`
 }
 
-// NewZuzenduAlta prepares a Zuzendu document to correct or modify the original
+// NewAmendment prepares an amendment to correct or modify the original
 // signed TicketBAI document with the data from the updated document. The
 // invoice's issue date and time, fingerprint and signature are always taken
 // from the original document, as these identify the invoice in the tax agency.
-func NewZuzenduAlta(action ZuzenduAction, orig, doc *TicketBAI) (*ZuzenduAlta, error) {
-	if action != ZuzenduCorrect && action != ZuzenduModify {
-		return nil, validationErr("invalid zuzendu action '%s'", action)
+func NewAmendment(action AmendmentAction, orig, doc *TicketBAI) (*Amendment, error) {
+	if action != AmendRejected && action != AmendReceived {
+		return nil, validationErr("invalid amendment action '%s'", action)
 	}
 	if orig.SignatureValue() == "" || orig.HuellaTBAI == nil {
 		return nil, validationErr("original document must be signed")
@@ -91,10 +92,10 @@ func NewZuzenduAlta(action ZuzenduAction, orig, doc *TicketBAI) (*ZuzenduAlta, e
 	f := *doc.Factura
 	f.CabeceraFactura = &h
 
-	return &ZuzenduAlta{
-		TNamespace: zuzenduAltaNamespace,
-		Cabecera: &ZuzenduCabecera{
-			IDVersion: zuzenduVersion,
+	return &Amendment{
+		TNamespace: amendmentNamespace,
+		Cabecera: &AmendmentCabecera{
+			IDVersion: amendmentVersion,
 			Accion:    action,
 		},
 		Sujetos:                    doc.Sujetos,
@@ -104,17 +105,17 @@ func NewZuzenduAlta(action ZuzenduAction, orig, doc *TicketBAI) (*ZuzenduAlta, e
 	}, nil
 }
 
-// NewZuzenduAnula prepares a Zuzendu document to correct the original signed
+// NewCancelAmendment prepares an amendment to correct the original signed
 // cancellation document that was rejected.
-func NewZuzenduAnula(orig *AnulaTicketBAI) (*ZuzenduAnula, error) {
+func NewCancelAmendment(orig *AnulaTicketBAI) (*CancelAmendment, error) {
 	if orig.SignatureValue() == "" || orig.HuellaTBAI == nil {
 		return nil, validationErr("original document must be signed")
 	}
 
-	return &ZuzenduAnula{
-		TNamespace: zuzenduBajaNamespace,
-		Cabecera: &ZuzenduCabecera{
-			IDVersion: zuzenduVersion,
+	return &CancelAmendment{
+		TNamespace: cancelAmendmentNamespace,
+		Cabecera: &AmendmentCabecera{
+			IDVersion: amendmentVersion,
 		},
 		IDFactura:                    orig.IDFactura,
 		HuellaTBAI:                   orig.HuellaTBAI,
@@ -123,21 +124,21 @@ func NewZuzenduAnula(orig *AnulaTicketBAI) (*ZuzenduAnula, error) {
 }
 
 // Bytes returns the XML document bytes
-func (doc *ZuzenduAlta) Bytes() ([]byte, error) {
+func (doc *Amendment) Bytes() ([]byte, error) {
 	return toBytes(doc)
 }
 
 // BytesIndent returns the indented XML document bytes
-func (doc *ZuzenduAlta) BytesIndent() ([]byte, error) {
+func (doc *Amendment) BytesIndent() ([]byte, error) {
 	return toBytesIndent(doc)
 }
 
 // Bytes returns the XML document bytes
-func (doc *ZuzenduAnula) Bytes() ([]byte, error) {
+func (doc *CancelAmendment) Bytes() ([]byte, error) {
 	return toBytes(doc)
 }
 
 // BytesIndent returns the indented XML document bytes
-func (doc *ZuzenduAnula) BytesIndent() ([]byte, error) {
+func (doc *CancelAmendment) BytesIndent() ([]byte, error) {
 	return toBytesIndent(doc)
 }

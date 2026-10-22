@@ -10,18 +10,18 @@ import (
 
 // TestConnection is a mock gateway connection for testing purposes
 type TestConnection struct {
-	postCalled          bool
-	cancelCalled        bool
-	postZuzenduCalled   bool
-	cancelZuzenduCalled bool
+	postCalled            bool
+	cancelCalled          bool
+	postAmendmentCalled   bool
+	cancelAmendmentCalled bool
 
-	// PostError, CancelError, PostZuzenduError and CancelZuzenduError, when
+	// PostError, CancelError, PostAmendmentError and CancelAmendmentError, when
 	// set, are returned by the corresponding method so that error handling can
 	// be exercised by tests.
-	PostError          error
-	CancelError        error
-	PostZuzenduError   error
-	CancelZuzenduError error
+	PostError            error
+	CancelError          error
+	PostAmendmentError   error
+	CancelAmendmentError error
 }
 
 var _ gateways.Connection = (*TestConnection)(nil)
@@ -38,14 +38,14 @@ func (tc *TestConnection) Cancel(_ context.Context, _ *bill.Invoice, _ *convert.
 	return tc.CancelError
 }
 
-// PostZuzendu mocks the PostZuzendu method of the Connection interface
-func (tc *TestConnection) PostZuzendu(_ context.Context, _ *bill.Invoice, _ *convert.ZuzenduAlta) error {
-	tc.postZuzenduCalled = true
-	return tc.PostZuzenduError
+// PostAmendment mocks the PostAmendment method of the Connection interface
+func (tc *TestConnection) PostAmendment(_ context.Context, _ *bill.Invoice, _ *convert.Amendment) error {
+	tc.postAmendmentCalled = true
+	return tc.PostAmendmentError
 }
 
-// CancelZuzendu mocks the CancelZuzendu method of the Connection interface
-func (tc *TestConnection) CancelZuzendu(_ context.Context, _ *bill.Invoice, _ *convert.ZuzenduAnula) error {
-	tc.cancelZuzenduCalled = true
-	return tc.CancelZuzenduError
+// CancelAmendment mocks the CancelAmendment method of the Connection interface
+func (tc *TestConnection) CancelAmendment(_ context.Context, _ *bill.Invoice, _ *convert.CancelAmendment) error {
+	tc.cancelAmendmentCalled = true
+	return tc.CancelAmendmentError
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestZuzendu(t *testing.T) {
+func TestAmendment(t *testing.T) {
 	schema, err := xsd.NewCompiler().CompileFile(
 		context.Background(),
 		test.Path("test", "schema", "zuzendu-schema.xsd"),
@@ -63,18 +63,18 @@ func TestZuzendu(t *testing.T) {
 		later, err := loadTBAIClientAt(time.Date(2022, 3, 15, 10, 0, 0, 0, time.UTC))
 		require.NoError(t, err)
 
-		zd, err := later.GenerateZuzendu(env, orig, ticketbai.ZuzenduModify)
+		ad, err := later.GenerateAmendment(env, orig, ticketbai.AmendReceived)
 		require.NoError(t, err)
 
-		assert.Equal(t, convert.ZuzenduModify, zd.Cabecera.Accion)
-		assert.Equal(t, "Corrected Name SL", zd.Sujetos.Destinatarios.IDDestinatario[0].ApellidosNombreRazonSocial)
-		assert.Equal(t, orig.Head().FechaExpedicionFactura, zd.Factura.CabeceraFactura.FechaExpedicionFactura)
-		assert.Equal(t, orig.Head().HoraExpedicionFactura, zd.Factura.CabeceraFactura.HoraExpedicionFactura)
-		assert.Equal(t, orig.HuellaTBAI, zd.HuellaTBAI)
-		assert.Len(t, zd.SignatureValueFirmaFactura, 100)
-		assert.Equal(t, orig.SignatureValue()[:100], zd.SignatureValueFirmaFactura)
+		assert.Equal(t, convert.AmendReceived, ad.Cabecera.Accion)
+		assert.Equal(t, "Corrected Name SL", ad.Sujetos.Destinatarios.IDDestinatario[0].ApellidosNombreRazonSocial)
+		assert.Equal(t, orig.Head().FechaExpedicionFactura, ad.Factura.CabeceraFactura.FechaExpedicionFactura)
+		assert.Equal(t, orig.Head().HoraExpedicionFactura, ad.Factura.CabeceraFactura.HoraExpedicionFactura)
+		assert.Equal(t, orig.HuellaTBAI, ad.HuellaTBAI)
+		assert.Len(t, ad.SignatureValueFirmaFactura, 100)
+		assert.Equal(t, orig.SignatureValue()[:100], ad.SignatureValueFirmaFactura)
 
-		data, err := zd.BytesIndent()
+		data, err := ad.BytesIndent()
 		require.NoError(t, err)
 		require.NoError(t, validateDoc(schema, data))
 	})
@@ -83,11 +83,11 @@ func TestZuzendu(t *testing.T) {
 		orig, stamps := issueOriginal(t)
 		env := test.LoadEnvelope("invoice-ss.json")
 
-		zd, err := tc.GenerateZuzendu(env, orig, ticketbai.ZuzenduCorrect)
+		ad, err := tc.GenerateAmendment(env, orig, ticketbai.AmendRejected)
 		require.NoError(t, err)
-		assert.Equal(t, convert.ZuzenduCorrect, zd.Cabecera.Accion)
+		assert.Equal(t, convert.AmendRejected, ad.Cabecera.Accion)
 
-		data, err := zd.Bytes()
+		data, err := ad.Bytes()
 		require.NoError(t, err)
 		require.NoError(t, validateDoc(schema, data))
 
@@ -101,7 +101,7 @@ func TestZuzendu(t *testing.T) {
 		env := test.LoadEnvelope("invoice-ss.json")
 		env.Extract().(*bill.Invoice).Code = cbc.Code("OTHER")
 
-		_, err := tc.GenerateZuzendu(env, orig, ticketbai.ZuzenduModify)
+		_, err := tc.GenerateAmendment(env, orig, ticketbai.AmendReceived)
 		assert.ErrorIs(t, err, ticketbai.ErrValidation)
 		assert.ErrorContains(t, err, "invoice code does not match")
 	})
@@ -111,7 +111,7 @@ func TestZuzendu(t *testing.T) {
 		orig, err := tc.Convert(env)
 		require.NoError(t, err)
 
-		_, err = tc.GenerateZuzendu(env, orig, ticketbai.ZuzenduCorrect)
+		_, err = tc.GenerateAmendment(env, orig, ticketbai.AmendRejected)
 		assert.ErrorIs(t, err, ticketbai.ErrValidation)
 		assert.ErrorContains(t, err, "original document must be signed")
 	})
@@ -120,7 +120,7 @@ func TestZuzendu(t *testing.T) {
 		orig, _ := issueOriginal(t)
 		env := test.LoadEnvelope("invoice-ss.json")
 
-		_, err := tc.GenerateZuzendu(env, orig, convert.ZuzenduAction("BORRAR"))
+		_, err := tc.GenerateAmendment(env, orig, convert.AmendmentAction("BORRAR"))
 		assert.ErrorIs(t, err, ticketbai.ErrValidation)
 	})
 
@@ -140,12 +140,12 @@ func TestZuzendu(t *testing.T) {
 		orig, err := ticketbai.ParseCancelDocument(data)
 		require.NoError(t, err)
 
-		zd, err := tc.GenerateZuzenduCancel(orig)
+		ad, err := tc.GenerateCancelAmendment(orig)
 		require.NoError(t, err)
-		assert.Equal(t, orig.IDFactura, zd.IDFactura)
-		assert.Equal(t, orig.SignatureValue()[:100], zd.SignatureValueFirmaAnulacion)
+		assert.Equal(t, orig.IDFactura, ad.IDFactura)
+		assert.Equal(t, orig.SignatureValue()[:100], ad.SignatureValueFirmaAnulacion)
 
-		data, err = zd.BytesIndent()
+		data, err = ad.BytesIndent()
 		require.NoError(t, err)
 		require.NoError(t, validateDoc(schema, data))
 	})
@@ -157,13 +157,13 @@ func TestZuzendu(t *testing.T) {
 		env := test.LoadEnvelope("invoice-ss.json")
 		ctx := context.Background()
 
-		require.NoError(t, c.PostZuzendu(ctx, env, new(convert.ZuzenduAlta)))
-		require.NoError(t, c.CancelZuzendu(ctx, env, new(convert.ZuzenduAnula)))
+		require.NoError(t, c.PostAmendment(ctx, env, new(convert.Amendment)))
+		require.NoError(t, c.CancelAmendment(ctx, env, new(convert.CancelAmendment)))
 
-		conn.PostZuzenduError = gateways.ErrDuplicate
-		conn.CancelZuzenduError = gateways.ErrValidation
-		assert.ErrorIs(t, c.PostZuzendu(ctx, env, new(convert.ZuzenduAlta)), ticketbai.ErrDuplicate)
-		assert.ErrorIs(t, c.CancelZuzendu(ctx, env, new(convert.ZuzenduAnula)), ticketbai.ErrValidation)
+		conn.PostAmendmentError = gateways.ErrDuplicate
+		conn.CancelAmendmentError = gateways.ErrValidation
+		assert.ErrorIs(t, c.PostAmendment(ctx, env, new(convert.Amendment)), ticketbai.ErrDuplicate)
+		assert.ErrorIs(t, c.CancelAmendment(ctx, env, new(convert.CancelAmendment)), ticketbai.ErrValidation)
 	})
 }
 

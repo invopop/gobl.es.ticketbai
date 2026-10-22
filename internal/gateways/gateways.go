@@ -43,16 +43,16 @@ const (
 	// anulado previamente".
 	codeAlreadyCancelled = "019"
 
-	// codeZuzenduAltaRegistered is returned by the Zuzendu service when the
+	// codeAmendmentRegistered is returned by the Zuzendu service when the
 	// alta document being corrected has already been registered: "Fichero de
 	// alta TicketBAI a subsanar ha sido recibido previamente en el sistema".
-	codeZuzenduAltaRegistered = "020"
+	codeAmendmentRegistered = "020"
 
-	// codeZuzenduAnulaRegistered is returned by the Zuzendu service when the
+	// codeCancelAmendmentRegistered is returned by the Zuzendu service when the
 	// cancellation being corrected has already been registered: "Fichero de
 	// anulación TicketBAI a subsanar no debe haber sido recibido previamente
 	// en el sistema".
-	codeZuzenduAnulaRegistered = "022"
+	codeCancelAmendmentRegistered = "022"
 )
 
 // asCancelDuplicate converts the validation responses that imply the document
@@ -155,12 +155,12 @@ type Connection interface {
 	// the document has been fully prepared and signed.
 	Post(ctx context.Context, inv *bill.Invoice, doc *convert.TicketBAI) error
 	Cancel(ctx context.Context, inv *bill.Invoice, doc *convert.AnulaTicketBAI) error
-	// PostZuzendu sends a correction or modification of an alta document to the
+	// PostAmendment sends a correction or modification of an alta document to the
 	// Zuzendu service.
-	PostZuzendu(ctx context.Context, inv *bill.Invoice, doc *convert.ZuzenduAlta) error
-	// CancelZuzendu sends a correction of a cancellation document to the
+	PostAmendment(ctx context.Context, inv *bill.Invoice, doc *convert.Amendment) error
+	// CancelAmendment sends a correction of a cancellation document to the
 	// Zuzendu service.
-	CancelZuzendu(ctx context.Context, inv *bill.Invoice, doc *convert.ZuzenduAnula) error
+	CancelAmendment(ctx context.Context, inv *bill.Invoice, doc *convert.CancelAmendment) error
 }
 
 // New instantiates a new connection for the given zone and environment.

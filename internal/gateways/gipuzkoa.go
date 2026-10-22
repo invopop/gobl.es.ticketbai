@@ -28,8 +28,8 @@ const (
 	gipuzkoaExecutePath = "/sarrerak/alta"
 	gipuzkoaCancelPath  = "/sarrerak/baja"
 
-	gipuzkoaZuzenduAltaPath = "/sarrerak/zuzendu-alta"
-	gipuzkoaZuzenduBajaPath = "/sarrerak/zuzendu-baja"
+	gipuzkoaAmendmentPath       = "/sarrerak/zuzendu-alta"
+	gipuzkoaCancelAmendmentPath = "/sarrerak/zuzendu-baja"
 )
 
 const (
@@ -94,24 +94,24 @@ func (c *GipuzkoaConn) Cancel(ctx context.Context, _ *bill.Invoice, doc *convert
 	return asCancelDuplicate(c.post(ctx, gipuzkoaCancelPath, payload))
 }
 
-// PostZuzendu sends a correction or modification of a previously issued
+// PostAmendment sends a correction or modification of a previously issued
 // document to the Gipuzkoa Zuzendu service.
-func (c *GipuzkoaConn) PostZuzendu(ctx context.Context, _ *bill.Invoice, doc *convert.ZuzenduAlta) error {
+func (c *GipuzkoaConn) PostAmendment(ctx context.Context, _ *bill.Invoice, doc *convert.Amendment) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return asDuplicate(c.post(ctx, gipuzkoaZuzenduAltaPath, payload), codeZuzenduAltaRegistered)
+	return asDuplicate(c.post(ctx, gipuzkoaAmendmentPath, payload), codeAmendmentRegistered)
 }
 
-// CancelZuzendu sends a correction of a previously rejected cancellation to the
+// CancelAmendment sends a correction of a previously rejected cancellation to the
 // Gipuzkoa Zuzendu service.
-func (c *GipuzkoaConn) CancelZuzendu(ctx context.Context, _ *bill.Invoice, doc *convert.ZuzenduAnula) error {
+func (c *GipuzkoaConn) CancelAmendment(ctx context.Context, _ *bill.Invoice, doc *convert.CancelAmendment) error {
 	payload, err := doc.Bytes()
 	if err != nil {
 		return fmt.Errorf("generating payload: %w", err)
 	}
-	return asDuplicate(c.post(ctx, gipuzkoaZuzenduBajaPath, payload), codeZuzenduAnulaRegistered)
+	return asDuplicate(c.post(ctx, gipuzkoaCancelAmendmentPath, payload), codeCancelAmendmentRegistered)
 }
 
 func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) error {
