@@ -164,6 +164,18 @@ func (c *EBizkaiaConn) Cancel(ctx context.Context, inv *bill.Invoice, doc *conve
 	return c.sendRequest(ctx, req, eBizkaiaExecutePath, nil)
 }
 
+// PostZuzendu is not supported in Bizkaia, which only offers the Zuzendu
+// service in the Gipuzkoa and Araba regions.
+func (c *EBizkaiaConn) PostZuzendu(_ context.Context, _ *bill.Invoice, _ *convert.ZuzenduAlta) error {
+	return ErrValidation.withMessage("zuzendu service not available in Bizkaia")
+}
+
+// CancelZuzendu is not supported in Bizkaia, which only offers the Zuzendu
+// service in the Gipuzkoa and Araba regions.
+func (c *EBizkaiaConn) CancelZuzendu(_ context.Context, _ *bill.Invoice, _ *convert.ZuzenduAnula) error {
+	return ErrValidation.withMessage("zuzendu service not available in Bizkaia")
+}
+
 func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, path string, resp interface{}) error {
 	r := c.client.R().
 		SetContext(ctx).

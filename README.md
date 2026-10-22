@@ -124,6 +124,29 @@ func main() {
 }
 ```
 
+### Resending with the Zuzendu service
+
+Gipuzkoa and Araba offer the Zuzendu service to resend an invoice that was already issued, for example to fix technical issues, without issuing a corrective invoice. Zuzendu documents are not signed: they reuse the fingerprint and signature of the original TicketBAI document, so the invoice keeps its TicketBAI code and QR. You'll need the original signed XML document, and the envelope with any corrected details:
+
+- `ticketbai.ZuzenduCorrect` ("subsanar") resends an invoice that was rejected, and so never registered.
+- `ticketbai.ZuzenduModify` ("modificar") replaces the details of an invoice that was received with errors. Basic invoice data cannot be modified in this way, and still requires a corrective invoice.
+
+```go
+orig, err := ticketbai.ParseDocument(origXML)
+if err != nil {
+	panic(err)
+}
+zd, err := tc.GenerateZuzendu(env, orig, ticketbai.ZuzenduCorrect)
+if err != nil {
+	panic(err)
+}
+if err := tc.PostZuzendu(ctx, env, zd); err != nil {
+	panic(err) // ticketbai.ErrDuplicate if already registered
+}
+```
+
+Rejected cancellations can be resent in the same way using `GenerateZuzenduCancel` and `CancelZuzendu` with the original signed cancellation document. The Zuzendu service is not available in Bizkaia.
+
 ## Command Line
 
 The GOBL TicketBAI package tool also includes a command line helper. You can find pre-built [gobl.cfdi binaries](https://github.com/invopop/gobl.es.ticketbai/releases) in the github repository, or install manually in your Go environment with:

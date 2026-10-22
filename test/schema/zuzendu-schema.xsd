@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- Pre-import the schemas referenced by the Zuzendu schemas from the
+	     local copies, so their imports are recognised as already satisfied.
+	     Lets the schema compile without network access. -->
+	<xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="./xmldsig-core-schema.xsd" />
+	<xs:import namespace="urn:ticketbai:emision" schemaLocation="./ticketbaiv1-2-2.xsd" />
+	<xs:import namespace="urn:ticketbai:anulacion" schemaLocation="./anula_ticketbaiv1-2-2.xsd" />
+	<xs:import namespace="urn:ticketbai:zuzendu-alta" schemaLocation="./zuzendualta_ticketbaiv1-2-2.xsd" />
+	<xs:import namespace="urn:ticketbai:zuzendu-baja" schemaLocation="./zuzenduanula_ticketbaiv1-2-2.xsd" />
+</xs:schema>

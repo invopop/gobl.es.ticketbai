@@ -16,6 +16,7 @@ import (
 //
 //  * Testing - https://web.araba.eus/documents/105044/5608600/Gu%C3%ADa+entorno+pruebas+TicketBAI+-+castellano.pdf/b74f0114-0b35-73c4-5c10-7741ad393658?t=1642408082727
 //  * Production - https://web.araba.eus/documents/105044/5608600/Anexo+IV+TicketBAI.pdf/fdf77a97-cbdb-8655-7e3f-b87c046da48e?t=1652787434485
+//  * Zuzendu - https://web.araba.eus/documents/1247685/1249204/Gu%C3%ADa+Pruebas+Zuzendu.pdf/9c1bf8fa-b935-97a1-c481-422e3a07ab86?t=1646659258998
 //
 
 const (
@@ -25,6 +26,9 @@ const (
 
 	arabaExecutePath = "/TicketBAI/v1/facturas/"
 	arabaCancelPath  = "/TicketBAI/v1/anulaciones/"
+
+	arabaZuzenduAltaPath = "/TicketBAI/v1/facturas/subsanarmodificar"
+	arabaZuzenduBajaPath = "/TicketBAI/v1/anulaciones/baja"
 )
 
 const (
@@ -87,6 +91,26 @@ func (c *ArabaConn) Cancel(ctx context.Context, _ *bill.Invoice, doc *convert.An
 		return fmt.Errorf("generating payload: %w", err)
 	}
 	return asCancelDuplicate(c.post(ctx, arabaCancelPath, payload))
+}
+
+// PostZuzendu sends a correction or modification of a previously issued
+// document to the Araba Zuzendu service.
+func (c *ArabaConn) PostZuzendu(ctx context.Context, _ *bill.Invoice, doc *convert.ZuzenduAlta) error {
+	payload, err := doc.Bytes()
+	if err != nil {
+		return fmt.Errorf("generating payload: %w", err)
+	}
+	return asDuplicate(c.post(ctx, arabaZuzenduAltaPath, payload), codeZuzenduAltaRegistered)
+}
+
+// CancelZuzendu sends a correction of a previously rejected cancellation to the
+// Araba Zuzendu service.
+func (c *ArabaConn) CancelZuzendu(ctx context.Context, _ *bill.Invoice, doc *convert.ZuzenduAnula) error {
+	payload, err := doc.Bytes()
+	if err != nil {
+		return fmt.Errorf("generating payload: %w", err)
+	}
+	return asDuplicate(c.post(ctx, arabaZuzenduBajaPath, payload), codeZuzenduAnulaRegistered)
 }
 
 func (c *ArabaConn) post(ctx context.Context, path string, payload []byte) error {

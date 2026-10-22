@@ -25,6 +25,12 @@ func (c *Client) Convert(env *gobl.Envelope) (*convert.TicketBAI, error) {
 	if hasExistingStamps(env) {
 		return nil, ErrDuplicate.withMessage("already has stamps")
 	}
+	return c.convertInvoice(inv)
+}
+
+// convertInvoice performs the conversion of the invoice without checking for
+// existing stamps, so that documents already issued can be regenerated.
+func (c *Client) convertInvoice(inv *bill.Invoice) (*convert.TicketBAI, error) {
 	if inv.Supplier.TaxID.Country != l10n.ES.Tax() {
 		return nil, ErrValidation.withMessage("only spanish invoices are supported")
 	}
