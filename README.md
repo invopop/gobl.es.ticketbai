@@ -141,9 +141,11 @@ if err != nil {
 	panic(err)
 }
 if err := tc.PostAmendment(ctx, env, ad); err != nil {
-	panic(err) // ticketbai.ErrDuplicate if already registered
+	panic(err)
 }
 ```
+
+If you don't know whether the original was accepted, use `ticketbai.AmendRejected`: when the tax agency reports the original as already registered, `PostAmendment` automatically resends the amendment as `ticketbai.AmendReceived`. `ParseAmendmentDocument` loads a stored amendment back from its XML.
 
 Rejected cancellations can be resent in the same way using `GenerateCancelAmendment` and `CancelAmendment` with the original signed cancellation document. Amendments are not available in Bizkaia.
 

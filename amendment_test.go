@@ -94,6 +94,13 @@ func TestAmendment(t *testing.T) {
 		// The TicketBAI code and QR come from the original signature, so
 		// they remain valid for the corrected document.
 		assert.Contains(t, stamps[0], orig.SignatureValue()[:13])
+
+		parsed, err := ticketbai.ParseAmendmentDocument(data)
+		require.NoError(t, err)
+		assert.Equal(t, ad.Cabecera, parsed.Cabecera)
+		assert.Equal(t, ad.Factura.CabeceraFactura, parsed.Factura.CabeceraFactura)
+		assert.Equal(t, ad.HuellaTBAI, parsed.HuellaTBAI)
+		assert.Equal(t, ad.SignatureValueFirmaFactura, parsed.SignatureValueFirmaFactura)
 	})
 
 	t.Run("rejects a different invoice", func(t *testing.T) {
@@ -165,6 +172,70 @@ func TestAmendment(t *testing.T) {
 		assert.ErrorIs(t, c.PostAmendment(ctx, env, new(convert.Amendment)), ticketbai.ErrDuplicate)
 		assert.ErrorIs(t, c.CancelAmendment(ctx, env, new(convert.CancelAmendment)), ticketbai.ErrValidation)
 	})
+}
+
+func TestPostAmendmentFallback(t *testing.T) {
+	env := test.LoadEnvelope("invoice-ss.json")
+	ctx := context.Background()
+	newAmendment := func(action convert.AmendmentAction) *convert.Amendment {
+		return &convert.Amendment{Cabecera: &convert.AmendmentCabecera{IDVersion: "1.0", Accion: action}}
+	}
+
+	t.Run("modifies when the original was registered", func(t *testing.T) {
+		conn := &sequenceConnection{errs: []error{gateways.ErrDuplicate, nil}}
+		c, err := ticketbai.New(&ticketbai.Software{}, ticketbai.ZoneSS, ticketbai.WithConnection(conn))
+		require.NoError(t, err)
+
+		ad := newAmendment(ticketbai.AmendRejected)
+		require.NoError(t, c.PostAmendment(ctx, env, ad))
+		assert.Equal(t, []convert.AmendmentAction{ticketbai.AmendRejected, ticketbai.AmendReceived}, conn.actions)
+		assert.Equal(t, ticketbai.AmendReceived, ad.Cabecera.Accion)
+	})
+
+	t.Run("reports errors from the modification", func(t *testing.T) {
+		conn := &sequenceConnection{errs: []error{gateways.ErrDuplicate, gateways.ErrValidation}}
+		c, err := ticketbai.New(&ticketbai.Software{}, ticketbai.ZoneSS, ticketbai.WithConnection(conn))
+		require.NoError(t, err)
+
+		err = c.PostAmendment(ctx, env, newAmendment(ticketbai.AmendRejected))
+		assert.ErrorIs(t, err, ticketbai.ErrValidation)
+		assert.Len(t, conn.actions, 2)
+	})
+
+	t.Run("does not retry other errors", func(t *testing.T) {
+		conn := &sequenceConnection{errs: []error{gateways.ErrValidation}}
+		c, err := ticketbai.New(&ticketbai.Software{}, ticketbai.ZoneSS, ticketbai.WithConnection(conn))
+		require.NoError(t, err)
+
+		err = c.PostAmendment(ctx, env, newAmendment(ticketbai.AmendRejected))
+		assert.ErrorIs(t, err, ticketbai.ErrValidation)
+		assert.Len(t, conn.actions, 1)
+	})
+
+	t.Run("does not retry modifications", func(t *testing.T) {
+		conn := &sequenceConnection{errs: []error{gateways.ErrDuplicate}}
+		c, err := ticketbai.New(&ticketbai.Software{}, ticketbai.ZoneSS, ticketbai.WithConnection(conn))
+		require.NoError(t, err)
+
+		err = c.PostAmendment(ctx, env, newAmendment(ticketbai.AmendReceived))
+		assert.ErrorIs(t, err, ticketbai.ErrDuplicate)
+		assert.Len(t, conn.actions, 1)
+	})
+}
+
+// sequenceConnection returns the given errors in order from PostAmendment,
+// and records the actions it was sent.
+type sequenceConnection struct {
+	ticketbai.TestConnection
+	errs    []error
+	actions []convert.AmendmentAction
+}
+
+func (c *sequenceConnection) PostAmendment(_ context.Context, _ *bill.Invoice, d *convert.Amendment) error {
+	c.actions = append(c.actions, d.Cabecera.Accion)
+	err := c.errs[0]
+	c.errs = c.errs[1:]
+	return err
 }
 
 func loadTBAIClientAt(ts time.Time) (*ticketbai.Client, error) {

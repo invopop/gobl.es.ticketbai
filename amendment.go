@@ -2,10 +2,13 @@ package ticketbai
 
 import (
 	"context"
+	"errors"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.es.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/bill"
+	"github.com/nbio/xml"
 )
 
 // Expose amendment actions for external use.
@@ -61,12 +64,23 @@ func (c *Client) GenerateCancelAmendment(orig *convert.AnulaTicketBAI) (*convert
 }
 
 // PostAmendment will send the amendment document to the TicketBAI gateway.
+//
+// When an AmendRejected document is refused because the original document
+// was registered after all, the amendment is automatically sent again as
+// AmendReceived. The document's action is updated to reflect what was sent, so
+// callers only need to know the original was issued, not whether the tax
+// agency accepted it.
 func (c *Client) PostAmendment(ctx context.Context, env *gobl.Envelope, d *convert.Amendment) error {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return ErrValidation.withMessage("only invoices are supported")
 	}
-	if err := c.gw.PostAmendment(ctx, inv, d); err != nil {
+	err := c.gw.PostAmendment(ctx, inv, d)
+	if errors.Is(err, gateways.ErrDuplicate) && d.Cabecera != nil && d.Cabecera.Accion == convert.AmendRejected {
+		d.Cabecera.Accion = convert.AmendReceived
+		err = c.gw.PostAmendment(ctx, inv, d)
+	}
+	if err != nil {
 		return newErrorFrom(err)
 	}
 	return nil
@@ -82,4 +96,13 @@ func (c *Client) CancelAmendment(ctx context.Context, env *gobl.Envelope, d *con
 		return newErrorFrom(err)
 	}
 	return nil
+}
+
+// ParseAmendmentDocument will parse the XML data into an amendment document.
+func ParseAmendmentDocument(data []byte) (*convert.Amendment, error) {
+	d := new(convert.Amendment)
+	if err := xml.Unmarshal(data, d); err != nil {
+		return nil, err
+	}
+	return d, nil
 }
