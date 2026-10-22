@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/gobl.es.ticketbai/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/l10n"
 	"github.com/lestrrat-go/helium/xsd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -172,6 +173,18 @@ func TestAmendment(t *testing.T) {
 		assert.ErrorIs(t, c.PostAmendment(ctx, env, new(convert.Amendment)), ticketbai.ErrDuplicate)
 		assert.ErrorIs(t, c.CancelAmendment(ctx, env, new(convert.CancelAmendment)), ticketbai.ErrValidation)
 	})
+}
+
+func TestSupportsAmendments(t *testing.T) {
+	for zone, supported := range map[l10n.Code]bool{
+		ticketbai.ZoneBI: false,
+		ticketbai.ZoneSS: true,
+		ticketbai.ZoneVI: true,
+	} {
+		c, err := ticketbai.New(&ticketbai.Software{}, zone, ticketbai.WithConnection(new(ticketbai.TestConnection)))
+		require.NoError(t, err)
+		assert.Equal(t, supported, c.SupportsAmendments(), zone)
+	}
 }
 
 func TestPostAmendmentFallback(t *testing.T) {

@@ -17,6 +17,12 @@ const (
 	AmendReceived = convert.AmendReceived // Modificar a document received with errors
 )
 
+// SupportsAmendments returns true when the client's zone offers the Zuzendu
+// service used to send amendments, which is the case in Gipuzkoa and Araba.
+func (c *Client) SupportsAmendments() bool {
+	return c.zone.In(ZoneSS, ZoneVI)
+}
+
 // GenerateAmendment creates a new amendment document to resend or modify the
 // original signed TicketBAI document using the current contents of the GOBL
 // Envelope. The original document is required as amendments are not signed,
