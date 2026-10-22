@@ -101,7 +101,7 @@ func NewAmendment(action AmendmentAction, orig, doc *TicketBAI) (*Amendment, err
 		Sujetos:                    doc.Sujetos,
 		Factura:                    &f,
 		HuellaTBAI:                 orig.HuellaTBAI,
-		SignatureValueFirmaFactura: trunc(orig.SignatureValue(), 100),
+		SignatureValueFirmaFactura: signaturePrefix(orig.SignatureValue()),
 	}, nil
 }
 
@@ -119,7 +119,7 @@ func NewCancelAmendment(orig *AnulaTicketBAI) (*CancelAmendment, error) {
 		},
 		IDFactura:                    orig.IDFactura,
 		HuellaTBAI:                   orig.HuellaTBAI,
-		SignatureValueFirmaAnulacion: trunc(orig.SignatureValue(), 100),
+		SignatureValueFirmaAnulacion: signaturePrefix(orig.SignatureValue()),
 	}, nil
 }
 

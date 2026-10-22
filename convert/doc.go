@@ -176,7 +176,7 @@ func (doc *TicketBAI) Sign(docID string, cert *xmldsig.Certificate, role IssuerR
 // in the next entry.
 func (doc *TicketBAI) ChainData() *ChainData {
 	h := doc.Head()
-	sig := trunc(doc.SignatureValue(), 100)
+	sig := signaturePrefix(doc.SignatureValue())
 	return &ChainData{
 		Series:    h.SerieFactura,
 		Code:      h.NumFactura,
