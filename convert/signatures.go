@@ -43,6 +43,14 @@ func (doc *TicketBAI) SignatureValue() string {
 	return doc.Signature.Value.Value
 }
 
+// SignatureValue provides quick access to the XML signatures final value.
+func (doc *AnulaTicketBAI) SignatureValue() string {
+	if doc.Signature == nil {
+		return ""
+	}
+	return doc.Signature.Value.Value
+}
+
 func signerRole(role IssuerRole) xmldsig.XAdESSignerRole {
 	switch role {
 	case IssuerRoleSupplier:

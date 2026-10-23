@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/invopop/gobl.es.ticketbai/ca"
@@ -41,14 +42,31 @@ const (
 	// already been cancelled previously: "El fichero de alta ya ha sido
 	// anulado previamente".
 	codeAlreadyCancelled = "019"
+
+	// codeAmendmentRegistered is returned by the Zuzendu service when the
+	// alta document being corrected has already been registered: "Fichero de
+	// alta TicketBAI a subsanar ha sido recibido previamente en el sistema".
+	codeAmendmentRegistered = "020"
+
+	// codeCancelAmendmentRegistered is returned by the Zuzendu service when the
+	// cancellation being corrected has already been registered: "Fichero de
+	// anulación TicketBAI a subsanar no debe haber sido recibido previamente
+	// en el sistema".
+	codeCancelAmendmentRegistered = "022"
 )
 
 // asCancelDuplicate converts the validation responses that imply the document
 // has already been cancelled into an ErrDuplicate, so that repeating a cancel
 // request can be handled as a no-op upstream.
 func asCancelDuplicate(err error) error {
+	return asDuplicate(err, codeAlreadyCancelled)
+}
+
+// asDuplicate converts validation responses with any of the given codes into
+// an ErrDuplicate.
+func asDuplicate(err error, codes ...string) error {
 	var e *Error
-	if errors.As(err, &e) && e.Code() == codeAlreadyCancelled {
+	if errors.As(err, &e) && slices.Contains(codes, e.Code()) {
 		return ErrDuplicate.withCode(e.Code()).withMessage(e.Message())
 	}
 	return err
@@ -137,6 +155,12 @@ type Connection interface {
 	// the document has been fully prepared and signed.
 	Post(ctx context.Context, inv *bill.Invoice, doc *convert.TicketBAI) error
 	Cancel(ctx context.Context, inv *bill.Invoice, doc *convert.AnulaTicketBAI) error
+	// PostAmendment sends a correction or modification of an alta document to the
+	// Zuzendu service.
+	PostAmendment(ctx context.Context, inv *bill.Invoice, doc *convert.Amendment) error
+	// CancelAmendment sends a correction of a cancellation document to the
+	// Zuzendu service.
+	CancelAmendment(ctx context.Context, inv *bill.Invoice, doc *convert.CancelAmendment) error
 }
 
 // New instantiates a new connection for the given zone and environment.

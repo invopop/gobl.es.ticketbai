@@ -164,6 +164,18 @@ func (c *EBizkaiaConn) Cancel(ctx context.Context, inv *bill.Invoice, doc *conve
 	return c.sendRequest(ctx, req, eBizkaiaExecutePath, nil)
 }
 
+// PostAmendment is not supported in Bizkaia, which only offers the Zuzendu
+// service in the Gipuzkoa and Araba regions.
+func (c *EBizkaiaConn) PostAmendment(_ context.Context, _ *bill.Invoice, _ *convert.Amendment) error {
+	return ErrValidation.withMessage("amendments not available in Bizkaia")
+}
+
+// CancelAmendment is not supported in Bizkaia, which only offers the Zuzendu
+// service in the Gipuzkoa and Araba regions.
+func (c *EBizkaiaConn) CancelAmendment(_ context.Context, _ *bill.Invoice, _ *convert.CancelAmendment) error {
+	return ErrValidation.withMessage("amendments not available in Bizkaia")
+}
+
 func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, path string, resp interface{}) error {
 	r := c.client.R().
 		SetContext(ctx).

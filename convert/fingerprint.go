@@ -43,15 +43,20 @@ func newHuellaTBAI(soft *Software, data *ChainData) *HuellaTBAI {
 			SerieFacturaAnterior:               data.Series,
 			NumFacturaAnterior:                 data.Code,
 			FechaExpedicionFacturaAnterior:     data.IssueDate,
-			SignatureValueFirmaFacturaAnterior: trunc(data.Signature, 100),
+			SignatureValueFirmaFacturaAnterior: signaturePrefix(data.Signature),
 		}
 	}
 	return huella
 }
 
-func trunc(s string, n int) string {
-	if len(s) <= n {
+// signaturePrefixLength is the number of characters of a signature that
+// TicketBAI documents use to refer to another document.
+const signaturePrefixLength = 100
+
+// signaturePrefix returns the start of the signature used to refer to it.
+func signaturePrefix(s string) string {
+	if len(s) <= signaturePrefixLength {
 		return s
 	}
-	return s[:n]
+	return s[:signaturePrefixLength]
 }

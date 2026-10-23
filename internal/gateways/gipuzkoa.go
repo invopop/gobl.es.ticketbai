@@ -18,6 +18,7 @@ import (
 //  * Docs: https://www.gipuzkoa.eus/es/web/ogasuna/ticketbai/documentacion-y-normativa
 //  * Testing: https://www.gipuzkoa.eus/documents/2456431/13761128/Guia+de+entono+de+pruebas+TicketBAI.pdf/d8b052ec-d40a-7f9c-0961-fcf7a631a948
 //  * Production: https://www.gipuzkoa.eus/documents/2456431/27508852/cast+03+ANEXO+IV+web+26-01-2022.pdf/a991d1ae-2b1c-f039-36a6-ae9220cc7127
+//  * Zuzendu: https://www.gipuzkoa.eus/documents/2456431/27508852/cast+07+anexo+I+OF+16-2022.pdf/563fdd24-ff5c-05f1-876e-5e837de6c42f
 
 const (
 	// Requests
@@ -26,6 +27,9 @@ const (
 
 	gipuzkoaExecutePath = "/sarrerak/alta"
 	gipuzkoaCancelPath  = "/sarrerak/baja"
+
+	gipuzkoaAmendmentPath       = "/sarrerak/zuzendu-alta"
+	gipuzkoaCancelAmendmentPath = "/sarrerak/zuzendu-baja"
 )
 
 const (
@@ -88,6 +92,26 @@ func (c *GipuzkoaConn) Cancel(ctx context.Context, _ *bill.Invoice, doc *convert
 		return fmt.Errorf("generating payload: %w", err)
 	}
 	return asCancelDuplicate(c.post(ctx, gipuzkoaCancelPath, payload))
+}
+
+// PostAmendment sends a correction or modification of a previously issued
+// document to the Gipuzkoa Zuzendu service.
+func (c *GipuzkoaConn) PostAmendment(ctx context.Context, _ *bill.Invoice, doc *convert.Amendment) error {
+	payload, err := doc.Bytes()
+	if err != nil {
+		return fmt.Errorf("generating payload: %w", err)
+	}
+	return asDuplicate(c.post(ctx, gipuzkoaAmendmentPath, payload), codeAmendmentRegistered)
+}
+
+// CancelAmendment sends a correction of a previously rejected cancellation to the
+// Gipuzkoa Zuzendu service.
+func (c *GipuzkoaConn) CancelAmendment(ctx context.Context, _ *bill.Invoice, doc *convert.CancelAmendment) error {
+	payload, err := doc.Bytes()
+	if err != nil {
+		return fmt.Errorf("generating payload: %w", err)
+	}
+	return asDuplicate(c.post(ctx, gipuzkoaCancelAmendmentPath, payload), codeCancelAmendmentRegistered)
 }
 
 func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) error {

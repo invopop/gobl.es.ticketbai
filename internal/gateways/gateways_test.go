@@ -107,3 +107,83 @@ func TestRegionalCancelDuplicate(t *testing.T) {
 		}
 	}
 }
+
+// TestRegionalAmendment ensures the regional gateways send amendments to the
+// right service and identify amendments that were already registered.
+func TestRegionalAmendment(t *testing.T) {
+	conns := map[string]struct {
+		new        func(*tls.Config, string) Connection
+		altaPath   string
+		cancelPath string
+	}{
+		"araba": {
+			new: func(tlsConf *tls.Config, url string) Connection {
+				c := newAraba(EnvironmentSandbox, tlsConf)
+				c.client.SetBaseURL(url)
+				return c
+			},
+			altaPath:   "/TicketBAI/v1/facturas/subsanarmodificar",
+			cancelPath: "/TicketBAI/v1/anulaciones/baja",
+		},
+		"gipuzkoa": {
+			new: func(tlsConf *tls.Config, url string) Connection {
+				c := newGipuzkoa(EnvironmentSandbox, tlsConf)
+				c.client.SetBaseURL(url)
+				return c
+			},
+			altaPath:   "/sarrerak/zuzendu-alta",
+			cancelPath: "/sarrerak/zuzendu-baja",
+		},
+	}
+
+	send := map[string]func(Connection) error{
+		"alta": func(c Connection) error {
+			return c.PostAmendment(context.Background(), nil, new(convert.Amendment))
+		},
+		"cancel": func(c Connection) error {
+			return c.CancelAmendment(context.Background(), nil, new(convert.CancelAmendment))
+		},
+	}
+
+	responses := map[string][]struct {
+		code   string
+		target error
+	}{
+		"alta":   {{"020", ErrDuplicate}, {"021", ErrValidation}, {"023", ErrValidation}},
+		"cancel": {{"022", ErrDuplicate}, {"018", ErrValidation}},
+	}
+
+	for name, conn := range conns {
+		for kind, rows := range responses {
+			path := conn.altaPath
+			if kind == "cancel" {
+				path = conn.cancelPath
+			}
+			for _, row := range rows {
+				t.Run(name+"/"+kind+"/"+row.code, func(t *testing.T) {
+					srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						assert.Equal(t, path, r.URL.Path)
+						assert.Equal(t, "application/xml; charset=UTF-8", r.Header.Get("Content-Type"))
+						w.Header().Set("Content-Type", "application/xml")
+						_, _ = fmt.Fprintf(w, cancelRejectedResponse, row.code, "rejected")
+					}))
+					defer srv.Close()
+
+					err := send[kind](conn.new(new(tls.Config), srv.URL))
+					require.Error(t, err)
+					assert.ErrorIs(t, err, row.target)
+
+					var e *Error
+					require.ErrorAs(t, err, &e)
+					assert.Equal(t, row.code, e.Code())
+				})
+			}
+		}
+	}
+}
+
+func TestEBizkaiaAmendment(t *testing.T) {
+	c := newEbizkaia(EnvironmentSandbox, new(tls.Config))
+	assert.ErrorIs(t, c.PostAmendment(context.Background(), nil, nil), ErrValidation)
+	assert.ErrorIs(t, c.CancelAmendment(context.Background(), nil, nil), ErrValidation)
+}
