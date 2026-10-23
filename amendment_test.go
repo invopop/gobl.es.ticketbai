@@ -114,6 +114,16 @@ func TestAmendment(t *testing.T) {
 		assert.ErrorContains(t, err, "invoice code does not match")
 	})
 
+	t.Run("rejects a different supplier", func(t *testing.T) {
+		orig, _ := issueOriginal(t)
+		env := test.LoadEnvelope("invoice-ss.json")
+		env.Extract().(*bill.Invoice).Supplier.TaxID.Code = cbc.Code("B85905495")
+
+		_, err := tc.GenerateAmendment(env, orig, ticketbai.AmendReceived)
+		assert.ErrorIs(t, err, ticketbai.ErrValidation)
+		assert.ErrorContains(t, err, "supplier does not match")
+	})
+
 	t.Run("rejects an unsigned original", func(t *testing.T) {
 		env := test.LoadEnvelope("invoice-ss.json")
 		orig, err := tc.Convert(env)
