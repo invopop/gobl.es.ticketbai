@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/convert"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"

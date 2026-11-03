@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/invopop/gobl.ticketbai/test"
+	"github.com/invopop/gobl.es.ticketbai/test"
 )
 
 func TestConvertRemovesIncludedTaxes(t *testing.T) {

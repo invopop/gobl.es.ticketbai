@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/invopop/gobl.ticketbai/internal/gateways/ebizkaia"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways/ebizkaia"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

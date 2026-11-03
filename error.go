@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/invopop/gobl.ticketbai/internal/gateways"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways"
 )
 
 // Main error types return by this package.

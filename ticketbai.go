@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ticketbai/convert"
-	"github.com/invopop/gobl.ticketbai/internal/gateways"
+	"github.com/invopop/gobl.es.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/internal/gateways"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/xmldsig"

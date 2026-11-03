@@ -10,7 +10,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"github.com/invopop/gobl.ticketbai/convert"
+	"github.com/invopop/gobl.es.ticketbai/convert"
 )
 
 // Bizkaia has extra complications when sending documents, so we define all the additional
