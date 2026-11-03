@@ -68,6 +68,14 @@ func TestEBizkaiaSendRequestErrors(t *testing.T) {
 			message: "Bad Request",
 		},
 		{
+			name:    "throttled status",
+			status:  http.StatusTooManyRequests,
+			body:    "Too Many Requests",
+			target:  ErrServer,
+			code:    "429",
+			message: "Too Many Requests",
+		},
+		{
 			name:    "server error status",
 			status:  http.StatusBadGateway,
 			body:    "Bad Gateway",

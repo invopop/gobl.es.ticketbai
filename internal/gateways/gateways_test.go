@@ -175,6 +175,14 @@ func TestRegionalErrors(t *testing.T) {
 			message: "Forbidden",
 		},
 		{
+			name:    "timeout status",
+			status:  http.StatusRequestTimeout,
+			body:    "Request Timeout",
+			target:  ErrServer,
+			code:    "408",
+			message: "Request Timeout",
+		},
+		{
 			name:    "server error status",
 			status:  http.StatusServiceUnavailable,
 			body:    "<html><body>Service Unavailable</body></html>",

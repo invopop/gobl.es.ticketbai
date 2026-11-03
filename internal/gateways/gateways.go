@@ -156,16 +156,25 @@ func (e *Error) clone() *Error {
 
 // statusError converts an unexpected HTTP status into an error. The status is
 // used as the code and the body as the message, as it usually describes what
-// went wrong in more detail than the status alone. Server errors are reported
-// separately so the request can be attempted again later.
+// went wrong in more detail than the status alone. Server errors, timeouts and
+// throttling are reported separately so the request can be attempted again
+// later.
 func statusError(res *resty.Response) *Error {
 	e := ErrValidation
-	if res.StatusCode() >= http.StatusInternalServerError {
+	if isTransientStatus(res.StatusCode()) {
 		e = ErrServer
 	}
 	return e.
 		withCode(strconv.Itoa(res.StatusCode())).
 		withMessage(strings.TrimSpace(res.String()))
+}
+
+// isTransientStatus reports whether an HTTP status describes a problem on the
+// gateway's side that may clear without changes to the document.
+func isTransientStatus(status int) bool {
+	return status >= http.StatusInternalServerError ||
+		status == http.StatusRequestTimeout ||
+		status == http.StatusTooManyRequests
 }
 
 // Is checks to see if the target error is the same as the current one
