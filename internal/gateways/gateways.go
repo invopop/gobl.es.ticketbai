@@ -46,6 +46,10 @@ var (
 	ErrServer = newError("server")
 )
 
+// msgMissingStatus is reported when the gateway responds successfully but
+// without the status that confirms the document was received.
+const msgMissingStatus = "response does not include a status"
+
 // Validation codes from the common TicketBAI specification, shared by the
 // Araba and Gipuzkoa gateways.
 const (

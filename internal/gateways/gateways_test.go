@@ -151,6 +151,14 @@ func TestRegionalErrors(t *testing.T) {
 			message: "Rechazado",
 		},
 		{
+			name:    "accepted status without acknowledgement",
+			status:  http.StatusOK,
+			body:    "<TicketBaiResponse/>",
+			target:  ErrConnection,
+			code:    "",
+			message: msgMissingStatus,
+		},
+		{
 			name:    "rejected alongside error status",
 			status:  http.StatusBadRequest,
 			body:    fmt.Sprintf(cancelRejectedResponse, "005", "El fichero de alta no existe"),

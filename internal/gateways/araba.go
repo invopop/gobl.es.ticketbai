@@ -151,6 +151,11 @@ func (c *ArabaConn) post(ctx context.Context, path string, payload []byte) error
 	if res.StatusCode() != http.StatusOK {
 		return statusError(res)
 	}
+	// A successful status is not an acknowledgement on its own, the gateway
+	// must have told us it received the document.
+	if out.Output.Status != arabaStatusReceived {
+		return ErrConnection.withMessage(msgMissingStatus)
+	}
 
 	return nil
 }

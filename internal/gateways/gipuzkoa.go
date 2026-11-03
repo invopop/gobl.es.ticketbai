@@ -152,6 +152,11 @@ func (c *GipuzkoaConn) post(ctx context.Context, path string, payload []byte) er
 	if res.StatusCode() != http.StatusOK {
 		return statusError(res)
 	}
+	// A successful status is not an acknowledgement on its own, the gateway
+	// must have told us it received the document.
+	if out.Output.Status != gipuzkoaStatusReceived {
+		return ErrConnection.withMessage(msgMissingStatus)
+	}
 
 	return nil
 }
