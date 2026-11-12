@@ -88,7 +88,7 @@ func isSimplified(inv *bill.Invoice) bool {
 	return inv.Tax != nil && inv.Tax.Ext.Get(tbai.ExtKeySimplified) == tbai.ExtValueSimplifiedYes
 }
 
-func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
+func newDatosFactura(inv *bill.Invoice, negate bool) (*DatosFactura, error) {
 	description, err := newDescription(inv.Notes)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
 
 	// This is only needed on Guipuzcoa and Alava, but Vizcaya documentation
 	// states that it will be safely ignored so it will be added for everyone
-	lineDetails := newDetallesFactura(inv)
+	lineDetails := newDetallesFactura(inv, negate)
 
 	opDate := inv.OperationDate
 	if opDate == nil {
@@ -108,8 +108,8 @@ func newDatosFactura(inv *bill.Invoice) (*DatosFactura, error) {
 		FechaOperacion:      opDateStr,
 		DescripcionFactura:  description,
 		DetallesFactura:     lineDetails,
-		ImporteTotalFactura: newImporteTotal(inv),
-		RetencionSoportada:  newRetencionSoportada(inv),
+		ImporteTotalFactura: newImporteTotal(inv, negate),
+		RetencionSoportada:  newRetencionSoportada(inv, negate),
 		Claves:              &Claves{IDClave: newClaves(inv)},
 	}, nil
 }
@@ -126,7 +126,7 @@ func newDescription(notes []*org.Note) (string, error) {
 // newImporteTotal determines the total amount of the invoice including any
 // non-retained taxes. Retained taxes are reported separately in
 // `RetencionSoportada`, so they are not subtracted here.
-func newImporteTotal(inv *bill.Invoice) string {
+func newImporteTotal(inv *bill.Invoice, negate bool) string {
 	total := inv.Totals.Total
 
 	totalTaxes := num.AmountZero
@@ -145,10 +145,10 @@ func newImporteTotal(inv *bill.Invoice) string {
 		total = total.MatchPrecision(*inv.Totals.Rounding).Add(*inv.Totals.Rounding)
 	}
 
-	return total.Rescale(2).String()
+	return signed(total, negate).Rescale(2).String()
 }
 
-func newRetencionSoportada(inv *bill.Invoice) string {
+func newRetencionSoportada(inv *bill.Invoice, negate bool) string {
 	totalRetention := num.AmountZero
 	if inv.Totals.Taxes != nil {
 		for _, category := range inv.Totals.Taxes.Categories {
@@ -158,7 +158,7 @@ func newRetencionSoportada(inv *bill.Invoice) string {
 		}
 	}
 
-	return totalRetention.Rescale(2).String()
+	return signed(totalRetention, negate).Rescale(2).String()
 }
 
 // newClaves returns the distinct ClaveRegimen codes from each VAT rate's
