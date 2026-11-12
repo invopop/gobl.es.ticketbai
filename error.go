@@ -10,10 +10,19 @@ import (
 
 // Main error types return by this package.
 var (
+	// ErrValidation implies there is something wrong with the contents of the
+	// document that needs to be fixed before sending it again.
 	ErrValidation = newError("validation")
-	ErrDuplicate  = newError("duplicate")
+	// ErrDuplicate is used when the gateway has already received the document.
+	ErrDuplicate = newError("duplicate")
+	// ErrConnection is used when the gateway could not be reached or gave a
+	// response we're unable to understand.
 	ErrConnection = newError("connection")
-	ErrInternal   = newError("internal")
+	// ErrServer indicates the gateway had an internal problem handling the
+	// request, which may succeed if attempted again later.
+	ErrServer = newError("server")
+	// ErrInternal is used for any other unexpected error.
+	ErrInternal = newError("internal")
 )
 
 // Error allows for structured responses to better handle errors upstream.
@@ -28,19 +37,24 @@ func newError(key string) *Error {
 	return &Error{key: key}
 }
 
-// newErrorFrom attempts to wrap the provided error into the Error type.
+// newErrorFrom attempts to wrap the provided error into the Error type. Errors
+// from the gateways are searched for in the chain so that their key and code
+// are preserved even if they were wrapped with additional context.
 func newErrorFrom(err error) *Error {
 	if err == nil {
 		return nil
 	}
-	if e, ok := err.(*Error); ok {
+	var e *Error
+	if errors.As(err, &e) {
 		return e
-	} else if e, ok := err.(*gateways.Error); ok {
+	}
+	var ge *gateways.Error
+	if errors.As(err, &ge) {
 		return &Error{
-			key:     e.Key(),
-			code:    e.Code(),
-			message: e.Message(),
-			cause:   e,
+			key:     ge.Key(),
+			code:    ge.Code(),
+			message: ge.Message(),
+			cause:   err,
 		}
 	}
 	return &Error{

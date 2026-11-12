@@ -8,10 +8,13 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/invopop/gobl.es.ticketbai/ca"
 	"github.com/invopop/gobl.es.ticketbai/convert"
 	"github.com/invopop/gobl/bill"
@@ -30,10 +33,22 @@ const (
 
 // Standard gateway error responses. Keys match the ones from main package.
 var (
+	// ErrConnection is used when the gateway could not be reached or gave a
+	// response we're unable to understand.
 	ErrConnection = newError("connection")
+	// ErrValidation implies there is something wrong with the contents of the
+	// request that needs to be fixed before sending it again.
 	ErrValidation = newError("validation")
-	ErrDuplicate  = newError("duplicate")
+	// ErrDuplicate is used when the gateway has already received the request.
+	ErrDuplicate = newError("duplicate")
+	// ErrServer indicates the gateway had an internal problem handling the
+	// request, which may succeed if attempted again later.
+	ErrServer = newError("server")
 )
+
+// msgMissingStatus is reported when the gateway responds successfully but
+// without the status that confirms the document was received.
+const msgMissingStatus = "response does not include a status"
 
 // Validation codes from the common TicketBAI specification, shared by the
 // Araba and Gipuzkoa gateways.
@@ -137,6 +152,29 @@ func (e *Error) clone() *Error {
 	ne := new(Error)
 	*ne = *e
 	return ne
+}
+
+// statusError converts an unexpected HTTP status into an error. The status is
+// used as the code and the body as the message, as it usually describes what
+// went wrong in more detail than the status alone. Server errors, timeouts and
+// throttling are reported separately so the request can be attempted again
+// later.
+func statusError(res *resty.Response) *Error {
+	e := ErrValidation
+	if isTransientStatus(res.StatusCode()) {
+		e = ErrServer
+	}
+	return e.
+		withCode(strconv.Itoa(res.StatusCode())).
+		withMessage(strings.TrimSpace(res.String()))
+}
+
+// isTransientStatus reports whether an HTTP status describes a problem on the
+// gateway's side that may clear without changes to the document.
+func isTransientStatus(status int) bool {
+	return status >= http.StatusInternalServerError ||
+		status == http.StatusRequestTimeout ||
+		status == http.StatusTooManyRequests
 }
 
 // Is checks to see if the target error is the same as the current one
