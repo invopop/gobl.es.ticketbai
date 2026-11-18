@@ -3,9 +3,11 @@ package gateways
 import (
 	"context"
 	"crypto/tls"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"slices"
 
 	"github.com/go-resty/resty/v2"
@@ -183,17 +185,26 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 		SetContext(ctx).
 		SetHeader("Content-Encoding", "gzip").
 		SetHeader("Content-Type", "application/octet-stream").
-		SetHeader("Accept-Encoding", "gzip").
 		SetContentLength(true).
 		SetHeaderVerbatim(eBizkaiaN3ContentTypeHeader, "application/xml").
 		SetHeaderVerbatim(eBizkaiaN3DataHeader, string(doc.Header)).
 		SetHeaderVerbatim(eBizkaiaN3VersionHeader, "1.0").
-		SetBody(doc.Payload).
-		SetResult(resp)
+		SetBody(doc.Payload)
 
 	res, err := r.Post(path)
 	if err != nil {
 		return ErrConnection.withCause(err)
+	}
+
+	// Some rejections come with an empty body and the outcome only in the
+	// headers, so a body that can't be decoded only matters when the headers
+	// report no outcome. A partly decoded body is discarded so that callers
+	// never read from it.
+	var decodeErr error
+	if resp != nil && res.IsSuccess() {
+		if decodeErr = xml.Unmarshal(res.Body(), resp); decodeErr != nil {
+			reflect.ValueOf(resp).Elem().SetZero()
+		}
 	}
 
 	// Always prefer the outcome reported in the headers, it describes the
@@ -213,6 +224,9 @@ func (c *EBizkaiaConn) sendRequest(ctx context.Context, doc *ebizkaia.Request, p
 	}
 	if res.StatusCode() != http.StatusOK {
 		return statusError(res)
+	}
+	if decodeErr != nil {
+		return ErrConnection.withCause(decodeErr)
 	}
 
 	return nil
