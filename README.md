@@ -196,7 +196,7 @@ gobl.ticketbai send ./test/data/sample-invoice.json
 Bizkaia's LROE / Batuz system uses two different registers depending on the type of issuer:
 
 - **Modelo 240** — for legal entities (_persona jurídica_, NIF/CIF starting with a letter, e.g. `B64847106`).
-- **Modelo 140** — for individuals (_persona física_, DNI, NIE and K/L/M IDs, e.g. `12345678Z`) and for entities under the income attribution regime (_entidades en régimen de atribución de rentas_), such as _comunidades de bienes_, whose NIF starts with `E`.
+- **Modelo 140** — for individuals (_persona física_, DNI, NIE and K/L/M IDs, e.g. `12345678Z`) and for entities under the income attribution regime (_entidades en régimen de atribución de rentas_): _comunidades de bienes_ and _herencias yacentes_ (NIF starting with `E`), _comunidades de propietarios_ (`H`) and _sociedades civiles_ (`J`).
 
 The library detects which model to use automatically from the supplier's tax identity. No configuration is required. A supplier whose tax ID isn't recognised keeps Modelo 240.
 

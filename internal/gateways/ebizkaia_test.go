@@ -139,6 +139,8 @@ func TestEBizkaiaPostModel(t *testing.T) {
 	}{
 		{name: "company", fixture: "sample-invoice.json", want: "240"},
 		{name: "entity under income attribution", fixture: "invoice-bi-pf-modelo140.json", code: "E12345674", want: "140"},
+		{name: "civil partnership", fixture: "invoice-bi-pf-modelo140.json", code: "J12345674", want: "140"},
+		{name: "community of owners", fixture: "invoice-bi-pf-modelo140.json", code: "H12345674", want: "140"},
 		{name: "individual", fixture: "invoice-bi-pf-modelo140.json", want: "140"},
 	}
 	for _, tt := range tests {

@@ -11,7 +11,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/invopop/gobl.es.ticketbai/convert"
 	"github.com/invopop/gobl.es.ticketbai/internal/gateways/ebizkaia"
-	"github.com/invopop/gobl.es.ticketbai/internal/lroe"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/tax"
@@ -229,7 +228,7 @@ func convertToUTF8(s string) string {
 // modelFor returns the Bizkaia LROE model code ("140" or "240") for a
 // supplier's tax identity.
 func modelFor(tID *tax.Identity) string {
-	if lroe.KeepsModelo140(tID) {
+	if convert.KeepsModelo140(tID) {
 		return ebizkaia.Modelo140
 	}
 	return ebizkaia.Modelo240

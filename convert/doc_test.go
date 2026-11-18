@@ -293,7 +293,7 @@ func TestInvoiceConversion(t *testing.T) {
 	})
 
 	t.Run("fail when a Bizkaia supplier that keeps Modelo 140 has no activity code", func(t *testing.T) {
-		for _, code := range []cbc.Code{"12345678Z", "E12345674"} {
+		for _, code := range []cbc.Code{"12345678Z", "E12345674", "J12345674", "H12345674"} {
 			inv := test.LoadInvoice("invoice-bi-pf-modelo140.json")
 			inv.Supplier.TaxID.Code = code
 			inv.Supplier.Ext = inv.Supplier.Ext.Delete(tbai.ExtKeyBIActivity)
