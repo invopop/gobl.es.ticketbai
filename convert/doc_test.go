@@ -292,6 +292,26 @@ func TestInvoiceConversion(t *testing.T) {
 		assert.Contains(t, err.Error(), "invoice charges are not supported")
 	})
 
+	t.Run("fail when a Bizkaia supplier that keeps Modelo 140 has no activity code", func(t *testing.T) {
+		for _, code := range []cbc.Code{"12345678Z", "E12345674"} {
+			inv := test.LoadInvoice("invoice-bi-pf-modelo140.json")
+			inv.Supplier.TaxID.Code = code
+			inv.Supplier.Ext = inv.Supplier.Ext.Delete(tbai.ExtKeyBIActivity)
+
+			_, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
+			require.Error(t, err, code)
+			assert.Contains(t, err.Error(), "es-tbai-bi-activity", code)
+		}
+	})
+
+	t.Run("accept an entity under income attribution with an activity code", func(t *testing.T) {
+		inv := test.LoadInvoice("invoice-bi-pf-modelo140.json")
+		inv.Supplier.TaxID.Code = "E12345674"
+
+		_, err := convert.NewTicketBAI(inv, ts, role, convert.ZoneBI)
+		require.NoError(t, err)
+	})
+
 	t.Run("accept line charges, which are reported through the unit price", func(t *testing.T) {
 		inv := test.LoadInvoice("sample-invoice.json")
 		inv.Lines[0].Charges = []*bill.LineCharge{{Amount: num.MakeAmount(100, 2)}}

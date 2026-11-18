@@ -196,11 +196,11 @@ gobl.ticketbai send ./test/data/sample-invoice.json
 Bizkaia's LROE / Batuz system uses two different registers depending on the type of issuer:
 
 - **Modelo 240** — for legal entities (_persona jurídica_, NIF/CIF starting with a letter, e.g. `B64847106`).
-- **Modelo 140** — for individuals (_persona física_, DNI / NIE / non-resident IDs, e.g. `12345678Z`).
+- **Modelo 140** — for individuals (_persona física_, DNI, NIE and K/L/M IDs, e.g. `12345678Z`) and for entities under the income attribution regime (_entidades en régimen de atribución de rentas_), such as _comunidades de bienes_, whose NIF starts with `E`.
 
-The library detects which model to use automatically from the supplier's tax identity, using GOBL's `es.TaxIdentityKey` helper. No configuration is required.
+The library detects which model to use automatically from the supplier's tax identity. No configuration is required. A supplier whose tax ID isn't recognised keeps Modelo 240.
 
-When the supplier is an individual in Bizkaia, their IAE-style activity code (_Epígrafe_) must be set on the supplier's `ext` map under the `es-tbai-bi-activity` key. This value is published in the `<Renta>` block of the Modelo 140 LROE submission. Reference:
+When the supplier keeps Modelo 140 in Bizkaia, their IAE-style activity code (_Epígrafe_) must be set on the supplier's `ext` map under the `es-tbai-bi-activity` key. The conversion fails without it. This value is published in the `<Renta>` block of the Modelo 140 LROE submission. Reference:
 
 - Activity codes (Epígrafes): https://www.batuz.eus/fitxategiak/batuz/lroe/batuz_lroe_lista_epigrafes_v1_0_4.xlsx
 - Modelo 140 specification: https://www.batuz.eus/fitxategiak/batuz/lroe/lroe_140_v_1_0.pdf
