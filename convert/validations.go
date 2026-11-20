@@ -3,6 +3,7 @@ package convert
 import (
 	"fmt"
 
+	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 )
@@ -53,6 +54,16 @@ func validate(inv *bill.Invoice, zone l10n.Code) error {
 		if inv.Customer != nil && len(inv.Customer.Addresses) == 0 {
 			return validationErr("customer address required")
 		}
+	}
+
+	// Bizkaia's Modelo 140 reports the supplier's activity code (epígrafe), and
+	// Batuz rejects a submission without one.
+	//
+	// TODO: move this check to the es-tbai addon, next to its rule that
+	// requires the activity code for individuals, once the addon is extracted
+	// from GOBL into this repo.
+	if zone == ZoneBI && KeepsModelo140(inv.Supplier.TaxID) && !inv.Supplier.Ext.Has(tbai.ExtKeyBIActivity) {
+		return validationErr("supplier extension '%s' is required for Bizkaia suppliers that keep LROE Modelo 140", tbai.ExtKeyBIActivity)
 	}
 
 	// Line charges are reported by folding them into the line's unit price, as

@@ -15,7 +15,6 @@ import (
 	"github.com/invopop/gobl.es.ticketbai/internal/gateways/ebizkaia"
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/regimes/es"
 	"github.com/invopop/gobl/tax"
 	"github.com/invopop/xmldsig"
 	"golang.org/x/net/html/charset"
@@ -241,13 +240,12 @@ func convertToUTF8(s string) string {
 }
 
 // modelFor returns the Bizkaia LROE model code ("140" or "240") for a
-// supplier's tax identity. Personas físicas (DNI/NIE/K-L-M) submit through
-// Modelo 140; organisations (NIF/CIF) through Modelo 240.
+// supplier's tax identity.
 func modelFor(tID *tax.Identity) string {
-	if es.TaxIdentityKey(tID) == es.TaxIdentityOrg {
-		return ebizkaia.Modelo240
+	if convert.KeepsModelo140(tID) {
+		return ebizkaia.Modelo140
 	}
-	return ebizkaia.Modelo140
+	return ebizkaia.Modelo240
 }
 
 // buildTBAIDoc builds a doc.TicketBAI from a TicketBAIType.

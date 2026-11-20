@@ -6,6 +6,8 @@ import (
 	"github.com/invopop/gobl/addons/es/tbai"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/regimes/es"
+	"github.com/invopop/gobl/tax"
 )
 
 // Sujetos contains invoice parties info
@@ -143,3 +145,24 @@ func partyCountry(party *org.Party) l10n.TaxCountryCode {
 	}
 	return ""
 }
+
+// KeepsModelo140 reports whether a supplier keeps Bizkaia's LROE under
+// Modelo 140: individuals, and entities under the income attribution regime
+// (ERAR). Batuz counts as ERAR comunidades de bienes and herencias yacentes
+// (NIF starting with E), comunidades de propietarios (H) and sociedades
+// civiles (J). Every other supplier, including one whose tax ID isn't
+// recognised, keeps Modelo 240.
+func KeepsModelo140(tID *tax.Identity) bool {
+	switch es.TaxIdentityKey(tID) {
+	case es.TaxIdentityNational, es.TaxIdentityForeigner, es.TaxIdentityOther:
+		return true
+	case es.TaxIdentityOrg:
+		return strings.IndexByte(incomeAttributionLetters, tID.Code.String()[0]) >= 0
+	default:
+		return false
+	}
+}
+
+// incomeAttributionLetters are the first letters of the NIFs of entities under
+// the income attribution regime.
+const incomeAttributionLetters = "EHJ"
