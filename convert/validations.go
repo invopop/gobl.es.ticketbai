@@ -58,6 +58,10 @@ func validate(inv *bill.Invoice, zone l10n.Code) error {
 
 	// Bizkaia's Modelo 140 reports the supplier's activity code (epígrafe), and
 	// Batuz rejects a submission without one.
+	//
+	// TODO: move this check to the es-tbai addon, next to its rule that
+	// requires the activity code for individuals, once the addon is extracted
+	// from GOBL into this repo.
 	if zone == ZoneBI && KeepsModelo140(inv.Supplier.TaxID) && !inv.Supplier.Ext.Has(tbai.ExtKeyBIActivity) {
 		return validationErr("supplier extension '%s' is required for Bizkaia suppliers that keep LROE Modelo 140", tbai.ExtKeyBIActivity)
 	}
