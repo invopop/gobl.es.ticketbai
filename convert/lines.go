@@ -30,7 +30,10 @@ type IDDetalleFactura struct {
 	ImporteTotal       string
 }
 
-func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
+// newDetallesFactura builds the line details. When negate is true, quantities
+// and amounts are inverted as required for credit notes, while unit prices are
+// kept positive.
+func newDetallesFactura(gobl *bill.Invoice, negate bool) *DetallesFactura {
 	lines := []IDDetalleFactura{}
 	for _, line := range gobl.Lines {
 		if line.Item.Price == nil {
@@ -39,10 +42,10 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 		unit, discount := newImporteUnitarioDescuento(line)
 		lines = append(lines, IDDetalleFactura{
 			DescripcionDetalle: line.Item.Name,
-			Cantidad:           line.Quantity.String(),
+			Cantidad:           signed(line.Quantity, negate).String(),
 			ImporteUnitario:    unit,
-			Descuento:          discount,
-			ImporteTotal:       calculateTotal(line).Rescale(currencyDecimals).String(),
+			Descuento:          signed(discount, negate).Rescale(currencyDecimals).String(),
+			ImporteTotal:       signed(calculateTotal(line), negate).Rescale(currencyDecimals).String(),
 		})
 	}
 
@@ -71,9 +74,9 @@ func newDetallesFactura(gobl *bill.Invoice) *DetallesFactura {
 // gateway's arithmetic; only this one keeps both fields meaning what they say.
 //
 // A discount is "against the line" when its sign opposes the line total's, not
-// simply when it is negative: credit notes are inverted before conversion, so
-// every amount on them, discounts included, is negative already.
-func newImporteUnitarioDescuento(line *bill.Line) (unit, discount string) {
+// simply when it is negative: a line's total may itself be negative. Credit
+// notes are negated only after this, which leaves the comparison unchanged.
+func newImporteUnitarioDescuento(line *bill.Line) (unit string, discount num.Amount) {
 	price := *line.Item.Price
 	amount := line.Sum.Subtract(*line.Total)
 
@@ -82,8 +85,7 @@ func newImporteUnitarioDescuento(line *bill.Line) (unit, discount string) {
 		amount = num.AmountZero
 	}
 
-	return price.RescaleRange(currencyDecimals, maxAmountDecimals).String(),
-		amount.Rescale(currencyDecimals).String()
+	return price.RescaleRange(currencyDecimals, maxAmountDecimals).String(), amount
 }
 
 // isSurcharge reports whether a line's discount runs against the line total,
@@ -117,4 +119,12 @@ func calculateTaxes(line *bill.Line) num.Amount {
 		}
 	}
 	return total
+}
+
+// signed returns the amount inverted if negate is true.
+func signed(a num.Amount, negate bool) num.Amount {
+	if negate {
+		return a.Invert()
+	}
+	return a
 }
